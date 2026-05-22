@@ -106,6 +106,7 @@
       letter-spacing: -0.5px;
       background: linear-gradient(to right, #f3f4f6, #9ca3af);
       -webkit-background-clip: text;
+      background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
@@ -599,7 +600,7 @@
             <path d="M2 12h2" />
           </svg>
         </div>
-        <h1 data-i18n="title">Modbus RTU 电机调试上位机</h1>
+        <h1 data-i18n="title">Modbus RTU 电机调试助手</h1>
       </div>
 
       <div class="actions-bar">
@@ -700,7 +701,7 @@
     // i18n Translation Dictionary
     const i18n = {
       zh: {
-        title: "Modbus RTU 电机调试上位机",
+        title: "Modbus RTU 电机调试助手",
         connect: "连接串口",
         disconnect: "断开连接",
         statusConnected: "已连接",
@@ -740,7 +741,7 @@
         pollingStart: "启动轮询，间隔 "
       },
       en: {
-        title: "Modbus RTU Motor Motor Tuner",
+        title: "Modbus RTU Motor Tuner",
         connect: "Connect Serial",
         disconnect: "Disconnect",
         statusConnected: "Connected",
@@ -837,7 +838,7 @@
               <button class="btn btn-control" id="enableBtn${id}" onclick="toggleBit(${id}, 'enable')">
                 <span data-i18n="enable">使能</span>
               </button>
-              <button class="btn btn-control" id="moveBtn${id}" onclick="toggleBit(${id}, 'move')">
+              <button class="btn btn-control" id="moveBtn${id}" onclick="pulseBit(${id}, 'move')">
                 <span data-i18n="move">运动</span>
               </button>
               <select id="modeSelect${id}" class="select-control" onchange="setMode(${id})">

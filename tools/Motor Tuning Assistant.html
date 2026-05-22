@@ -729,8 +729,11 @@
         send: "发送",
         clear: "清空日志",
         hexPlaceholder: "例如：01 03 00 00 00 0A",
-        alertUnconnected: "串口未连接，无法发送数据！",
+        alertUnconnected: "请先连接串口！",
         alertConnectFail: "串口连接失败：",
+        verifying: "正在验证设备类型...",
+        verificationSuccess: "设备验证成功，电机控制板已就绪。",
+        verificationFailed: "设备验证失败！未检测到正确的电机控制板，请检查串口连接。",
         logConnected: "串口已成功打开",
         logDisconnected: "串口已关闭",
         logSent: "发送：",
@@ -769,8 +772,11 @@
         send: "Send",
         clear: "Clear Logs",
         hexPlaceholder: "e.g. 01 03 00 00 00 0A",
-        alertUnconnected: "Serial port not connected, cannot send!",
+        alertUnconnected: "Please connect the serial port first!",
         alertConnectFail: "Serial connection failed: ",
+        verifying: "Verifying device type...",
+        verificationSuccess: "Device verified successfully. Motor control board is ready.",
+        verificationFailed: "Device verification failed! Correct motor control board not detected, please check serial connection.",
         logConnected: "Serial port opened successfully",
         logDisconnected: "Serial port closed",
         logSent: "Sent: ",
@@ -920,6 +926,15 @@
       updateLanguage();
     }
 
+    // 检查并提示连接串口
+    function checkConnection() {
+      if (!port || !writer) {
+        alert(i18n[currentLang].alertUnconnected);
+        return false;
+      }
+      return true;
+    }
+
     // 串口连接开关
     async function toggleConnection() {
       if (port) {
@@ -944,6 +959,20 @@
         writer = port.writable.getWriter();
         reader = port.readable.getReader();
 
+        // 启动后台读取循环，为验证数据接收做准备
+        readSerialLoop();
+
+        // 开始进行设备验证
+        logConsole(i18n[currentLang].verifying);
+        const verified = await verifyDeviceConnection();
+        if (!verified) {
+          alert(i18n[currentLang].verificationFailed);
+          await disconnectSerial();
+          return;
+        }
+
+        logConsole(i18n[currentLang].verificationSuccess);
+
         document.getElementById("serialStatus").className = "status-badge status-connected";
         document.getElementById("serialStatus").setAttribute("data-i18n", "statusConnected");
         document.getElementById("connectBtn").setAttribute("data-i18n", "disconnect");
@@ -955,11 +984,7 @@
         startPolling();
       } catch (e) {
         alert(i18n[currentLang].alertConnectFail + e);
-        document.getElementById("serialStatus").className = "status-badge status-disconnected";
-        document.getElementById("serialStatus").setAttribute("data-i18n", "statusDisconnected");
-        document.getElementById("connectBtn").setAttribute("data-i18n", "connect");
-        document.getElementById("connectBtn").className = "btn btn-success";
-        updateLanguage();
+        await disconnectSerial();
       }
     }
 
@@ -1027,6 +1052,72 @@
       }
     }
 
+    // --- 设备验证辅助逻辑 ---
+    let pendingResponseResolver = null;
+
+    function buildCustomReadRequest(startAddr, regCount = 1) {
+      const payload = [0x01, 0x03, startAddr >> 8, startAddr & 0xff, regCount >> 8, regCount & 0xff];
+      const crc = crc16(payload);
+      return new Uint8Array([...payload, crc & 0xff, crc >> 8]);
+    }
+
+    function sendAndWaitResponse(frame, timeoutMs = 800) {
+      return new Promise((resolve) => {
+        let timeoutTimer = setTimeout(() => {
+          pendingResponseResolver = null;
+          resolve({ success: false, timeout: true });
+        }, timeoutMs);
+
+        pendingResponseResolver = (result) => {
+          clearTimeout(timeoutTimer);
+          pendingResponseResolver = null;
+          resolve(result);
+        };
+
+        logConsole(i18n[currentLang].logSent + [...frame].map((b) => b.toString(16).padStart(2, "0")).join(" "));
+        writer.write(frame).catch(err => {
+          clearTimeout(timeoutTimer);
+          pendingResponseResolver = null;
+          resolve({ success: false, error: err });
+        });
+      });
+    }
+
+    async function verifyDeviceConnection() {
+      // 1. 验证第一个寄存器地址 (0)
+      const frame0 = buildCustomReadRequest(0, 1);
+      const res0 = await sendAndWaitResponse(frame0, 1000);
+      if (!res0.success) {
+        logConsole("Verification failed: Register 0 read failed.");
+        return false;
+      }
+
+      // 2. 验证最后一个寄存器地址 (29)
+      const frame29 = buildCustomReadRequest(29, 1);
+      const res29 = await sendAndWaitResponse(frame29, 1000);
+      if (!res29.success) {
+        logConsole("Verification failed: Register 29 read failed.");
+        return false;
+      }
+
+      // 3. 验证最后一个寄存器后一个地址 (30)，期望响应异常且异常码为 02
+      const frame30 = buildCustomReadRequest(30, 1);
+      const res30 = await sendAndWaitResponse(frame30, 1000);
+
+      if (res30.success) {
+        logConsole("Verification failed: Register 30 exists, wrong device connected.");
+        return false;
+      }
+
+      if (res30.exceptionCode !== 2) {
+        logConsole("Verification failed: Register 30 did not return Modbus exception code 02 (got: " + res30.exceptionCode + ").");
+        return false;
+      }
+
+      return true;
+    }
+    // -------------------------
+
     // 转换 float32 到两个寄存器的 16 位数数组（高位在前）
     function float32ToRegisters(val) {
       const buf = new DataView(new ArrayBuffer(4));
@@ -1083,6 +1174,7 @@
 
     // 控制字操作：切换位
     function toggleBit(id, bitName) {
+      if (!checkConnection()) return;
       const bit = CONTROL_BITS[bitName];
       controlWords[id] ^= 1 << bit;
       updateControlButtons(id);
@@ -1091,6 +1183,7 @@
 
     // 控制字操作：脉冲位（短按触发）
     function pulseBit(id, bitName) {
+      if (!checkConnection()) return;
       const bit = CONTROL_BITS[bitName];
       controlWords[id] |= 1 << bit;
       updateControlButtons(id);
@@ -1143,12 +1236,13 @@
       } else {
         controlWords[id] &= ~(1 << CONTROL_BITS.abs);
       }
-      sendControlWord(id);
+      // 不在此处发送数据
       updateControlButtons(id);
     }
 
     // 发送参数：目标位置、速度、加速度
     function sendParams(id) {
+      if (!checkConnection()) return;
       const pos = parseFloat(document.getElementById(`targetPos${id}`).value) || 0;
       const spd = parseFloat(document.getElementById(`speed${id}`).value) || 0;
       const acc = parseFloat(document.getElementById(`accel${id}`).value) || 0;
@@ -1160,7 +1254,13 @@
     }
 
     // 读取所有电机的所有寄存器 (0 - 29)
-    function readAllParams() {
+    function readAllParams(isAuto = false) {
+      if (!port || !writer) {
+        if (!isAuto) {
+          alert(i18n[currentLang].alertUnconnected);
+        }
+        return;
+      }
       const slaveId = 1;
       const functionCode = 0x03;
       const registerCount = 30;
@@ -1191,11 +1291,9 @@
       request[7] = (crc >> 8) & 0xFF; // CRC 高位
 
       // 发送到串口
-      if (writer) {
-        writer.write(request);
-      } else {
-        logConsole(i18n[currentLang].alertUnconnected);
-      }
+      writer.write(request).catch(e => {
+        logConsole("Read error: " + e);
+      });
     }
 
     // 轮询动画进度条
@@ -1222,46 +1320,90 @@
       if (pollingTimer) clearInterval(pollingTimer);
       const interval = parseInt(document.getElementById("pollingInterval").value) || 1000;
       pollingTimer = setInterval(() => {
-        readAllParams();
+        readAllParams(true);
       }, interval);
       animateProgressBar(interval);
       logConsole(i18n[currentLang].pollingStart + interval + " ms");
-      readAllParams();
-      readSerialLoop();
+      readAllParams(true);
+      // readSerialLoop() is now started prior to verification in connectSerial()
     }
 
     function parseSerialBuffer() {
       while (serialBuffer.length >= 5) {
-        if (serialBuffer[1] !== 0x03) {
-          logConsole(i18n[currentLang].unsupportedFunc + serialBuffer[1]);
-          serialBuffer.shift();
+        const slave = serialBuffer[0];
+        const func = serialBuffer[1];
+
+        // 异常帧响应 (功能码最高位为 1，即 func >= 0x80)，异常帧固定为 5 字节
+        if (func >= 0x80) {
+          const frameLen = 5;
+          if (serialBuffer.length < frameLen) break;
+          const frame = serialBuffer.slice(0, frameLen);
+          const crcCalc = crc16(frame.slice(0, frameLen - 2));
+          const crcReceived = (frame[frameLen - 1] << 8) | frame[frameLen - 2];
+          if (crcCalc !== crcReceived) {
+            serialBuffer.shift();
+            continue;
+          }
+
+          logConsole(i18n[currentLang].logReceived + " [Exception " + frame[2] + "] " + frame.map(v => v.toString(16).padStart(2, '0')).join(' '));
+
+          if (pendingResponseResolver) {
+            pendingResponseResolver({ success: false, exceptionCode: frame[2], frame: frame });
+          }
+
+          serialBuffer.splice(0, frameLen);
           continue;
         }
 
-        const byteCount = serialBuffer[2];
-        const frameLen = 3 + byteCount + 2; // [头 3 字节]+[数据]+[CRC2 字节]
+        // 读寄存器响应功能码 (0x03)
+        if (func === 0x03) {
+          const byteCount = serialBuffer[2];
+          const frameLen = 3 + byteCount + 2;
+          if (serialBuffer.length < frameLen) break;
+          const frame = serialBuffer.slice(0, frameLen);
+          const crcCalc = crc16(frame.slice(0, frameLen - 2));
+          const crcReceived = (frame[frameLen - 1] << 8) | frame[frameLen - 2];
+          if (crcCalc !== crcReceived) {
+            serialBuffer.shift();
+            continue;
+          }
 
-        if (serialBuffer.length < frameLen) {
-          // 等待更多数据
-          break;
-        }
+          logConsole(i18n[currentLang].logReceived + frame.map(v => v.toString(16).padStart(2, '0')).join(' '));
 
-        const frame = serialBuffer.slice(0, frameLen);
-        const crcCalc = crc16(frame.slice(0, frameLen - 2));
-        const crcReceived = (frame[frameLen - 1] << 8) | frame[frameLen - 2];
+          if (pendingResponseResolver) {
+            pendingResponseResolver({ success: true, func: 0x03, data: frame.slice(3, 3 + byteCount), frame: frame });
+          } else {
+            parseModbusResponse(frame);
+          }
 
-        if (crcCalc !== crcReceived) {
-          logConsole(i18n[currentLang].crcFailed);
-          serialBuffer.shift();
+          serialBuffer.splice(0, frameLen);
           continue;
         }
 
-        // CRC 正确，处理该帧
-        logConsole(i18n[currentLang].logReceived + frame.map(v => v.toString(16).padStart(2, '0')).join(' '));
-        parseModbusResponse(frame);
+        // 写寄存器响应功能码 (0x10)
+        if (func === 0x10) {
+          const frameLen = 8;
+          if (serialBuffer.length < frameLen) break;
+          const frame = serialBuffer.slice(0, frameLen);
+          const crcCalc = crc16(frame.slice(0, frameLen - 2));
+          const crcReceived = (frame[frameLen - 1] << 8) | frame[frameLen - 2];
+          if (crcCalc !== crcReceived) {
+            serialBuffer.shift();
+            continue;
+          }
 
-        // 移除已处理帧
-        serialBuffer.splice(0, frameLen);
+          logConsole(i18n[currentLang].logReceived + frame.map(v => v.toString(16).padStart(2, '0')).join(' '));
+
+          if (pendingResponseResolver) {
+            pendingResponseResolver({ success: true, func: 0x10, frame: frame });
+          }
+
+          serialBuffer.splice(0, frameLen);
+          continue;
+        }
+
+        // 不支持的功能码或无效字节，向后平移
+        serialBuffer.shift();
       }
     }
 
@@ -1352,10 +1494,7 @@
 
     // 手动发送数据，输入 16 进制字符串
     async function manualSend() {
-      if (!writer) {
-        alert(i18n[currentLang].alertUnconnected);
-        return;
-      }
+      if (!checkConnection()) return;
       const hexStr = document.getElementById("manualHex").value.trim();
       if (!hexStr) return;
 

@@ -19,14 +19,14 @@ void setup() {
   // setupModbus(2);
   sfSerial.begin(9600);
   Serial.begin(9600);
-  mb.begin(&sfSerial, 2);
-  mb.setBaudrate(9600);
-  mb.server(1);
+  getModbus().begin(&sfSerial, 2);
+  getModbus().setBaudrate(9600);
+  getModbus().server(1);
   setupMotorMap(motors, motorCount);
 }
 
 void loop() {
-  mb.task();
+  getModbus().task();
   handleMotorControl();
   updateMotorStatus();
 }

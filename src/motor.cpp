@@ -1,5 +1,6 @@
 #include "motor.h"
 #include <Arduino.h>
+#include <EEPROM.h>
 #include <math.h>
 
 Motor::Motor(uint8_t stepPin, uint8_t dirPin, float stepsPerUnit,

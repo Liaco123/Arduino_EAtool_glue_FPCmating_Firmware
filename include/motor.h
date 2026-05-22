@@ -23,6 +23,8 @@ private:
   float _lastPos;
   bool _completed;
   bool _running;
+  bool _lastTriggerState; // 上次运动触发状态，用于上升沿检测
+  bool _lastInitState;    // 上次初始化触发状态，用于上升沿检测
 
 public:
   Motor(uint8_t stepPin, uint8_t dirPin, float stepsPerUnit = 100.0f,

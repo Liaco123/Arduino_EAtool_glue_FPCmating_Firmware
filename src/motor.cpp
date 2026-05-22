@@ -5,8 +5,19 @@
 Motor::Motor(uint8_t stepPin, uint8_t dirPin, float stepsPerUnit,
              int eepromAddr)
     : AccelStepper(AccelStepper::DRIVER, stepPin, dirPin),
-      _stepsPerUnit(stepsPerUnit), _eepromAddr(eepromAddr), _enabled(false),
-      _errorFlag(false) {
+      _stepsPerUnit(stepsPerUnit),
+      _maxSpeedUnit(0.0f),
+      _accelerationUnit(0.0f),
+      _targetPos(0.0f),
+      _eepromAddr(eepromAddr),
+      _enabled(false),
+      _errorFlag(false),
+      _runed(false),
+      _lastPos(0.0f),
+      _completed(false),
+      _running(false),
+      _lastTriggerState(false),
+      _lastInitState(false) {
   float pos = 0.0f;
   EEPROM.get(_eepromAddr, pos);
 
@@ -60,7 +71,7 @@ void Motor::savePositionToEEPROM() {
 void Motor::loadPositionFromEEPROM() {
   float pos = 0.0f;
   EEPROM.get(_eepromAddr, pos);
-  if (!isnan(pos)) {
+  if (!isnan(pos) && fabs(pos) <= 100000.0f) {
     setCurrentPos(pos);
   } else {
     setCurrentPosition(0);
@@ -68,9 +79,11 @@ void Motor::loadPositionFromEEPROM() {
 }
 
 void Motor::emergencyStop() {
-  stop();                                // 停止运动（非急停）
-  setCurrentPosition(currentPosition()); // 锁定当前位置
+  stop();                                // 减速并停止运动
+  setCurrentPosition(currentPosition()); // 锁定当前物理位置
   _enabled = false;
+  _runed = false;                        // 重置运行标记以防止误判触发
+  savePositionToEEPROM();                // 急停时立刻持久化当前位置
 }
 
 void Motor::handleControlWord(uint16_t cw) {
@@ -86,18 +99,27 @@ void Motor::handleControlWord(uint16_t cw) {
     return;
   }
 
-  if (cw & 0x02) { // bit 1: 运动触发
-    if (!_running) {
+  // bit 3: 初始化 (上升沿检测)
+  bool currentInit = (cw & 0x08) != 0;
+  if (currentInit && !_lastInitState) {
+    initial();
+    savePositionToEEPROM(); // 初始化为 0 后立刻持久化
+  }
+  _lastInitState = currentInit;
 
+  // bit 1: 运动触发 (上升沿检测)
+  bool currentTrigger = (cw & 0x02) != 0;
+  if (currentTrigger && !_lastTriggerState) {
+    if (!_running) {
       if (cw & 0x04) { // bit 2: 绝对位置
         moveTo(_targetPos);
-
       } else {
         move(_targetPos);
       }
       _lastPos = _targetPos;
     }
   }
+  _lastTriggerState = currentTrigger;
 }
 
 uint16_t Motor::getStatusWord() {
@@ -114,6 +136,7 @@ uint16_t Motor::getStatusWord() {
     if (_runed && distanceToGo() == 0) {
       status |= STATUS_COMPLETED;
       _runed = false;
+      savePositionToEEPROM(); // 运动完成到达目标位置时，自动持久化当前位置到 EEPROM
     }
   }
 

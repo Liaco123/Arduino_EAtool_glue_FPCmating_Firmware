@@ -3,9 +3,9 @@
 #include <Arduino.h>
 #include <SoftwareSerial.h>
 
-Motor motor1(3, 4, 1600.0f, 0);
-Motor motor2(5, 6, 400.0f, 2);
-Motor motor3(7, 8, 1600.0f, 4);
+Motor motor1(3, 4, 1600.0f, 0);  // 占用 EEPROM 0-3 字节
+Motor motor2(5, 6, 400.0f, 4);   // 修改为 4，占用 EEPROM 4-7 字节
+Motor motor3(7, 8, 1600.0f, 8);  // 修改为 8，占用 EEPROM 8-11 字节
 
 Motor *motors[] = {&motor1, &motor2, &motor3};
 const uint8_t motorCount = sizeof(motors) / sizeof(motors[0]);

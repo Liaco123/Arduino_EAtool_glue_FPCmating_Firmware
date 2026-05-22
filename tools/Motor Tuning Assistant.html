@@ -4,13 +4,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title data-i18n="title">Modbus RTU 电机调试上位机</title>
-  
+  <title data-i18n="title">Modbus RTU 电机调试助手</title>
+
   <!-- Import Google Fonts for premium typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+
   <style>
     :root {
       /* Deep space theme variables */
@@ -22,11 +24,11 @@
       --input-bg: rgba(15, 23, 42, 0.6);
       --input-border: rgba(255, 255, 255, 0.12);
       --input-focus: rgba(59, 130, 246, 0.5);
-      
+
       --text-primary: #f3f4f6;
       --text-secondary: #9ca3af;
       --text-muted: #6b7280;
-      
+
       /* Vibrant status colors */
       --primary-color: #3b82f6;
       --primary-hover: #2563eb;
@@ -36,12 +38,12 @@
       --danger-hover: #e11d48;
       --warning-color: #f59e0b;
       --accent-color: #8b5cf6;
-      
+
       /* Typography tokens */
       --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       --font-heading: 'Outfit', sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
-      
+
       --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
       --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
       --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.25), 0 4px 6px -2px rgba(0, 0, 0, 0.15);
@@ -142,7 +144,8 @@
       white-space: nowrap;
     }
 
-    input, select {
+    input,
+    select {
       background: var(--input-bg);
       border: 1px solid var(--input-border);
       color: var(--text-primary);
@@ -153,7 +156,8 @@
       outline: none;
     }
 
-    input:focus, select:focus {
+    input:focus,
+    select:focus {
       border-color: var(--primary-color);
       box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
     }
@@ -188,6 +192,7 @@
       background-color: var(--primary-color);
       color: white;
     }
+
     .btn-primary:hover {
       background-color: var(--primary-hover);
       box-shadow: var(--shadow-glow);
@@ -197,6 +202,7 @@
       background-color: var(--success-color);
       color: white;
     }
+
     .btn-success:hover {
       background-color: var(--success-hover);
       box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
@@ -206,6 +212,7 @@
       background-color: var(--danger-color);
       color: white;
     }
+
     .btn-danger:hover {
       background-color: var(--danger-hover);
       box-shadow: 0 0 15px rgba(244, 63, 94, 0.3);
@@ -216,6 +223,7 @@
       color: var(--text-primary);
       border-color: rgba(255, 255, 255, 0.05);
     }
+
     .btn-secondary:hover {
       background-color: rgba(255, 255, 255, 0.15);
     }
@@ -265,9 +273,21 @@
     }
 
     @keyframes pulse-green {
-      0% { transform: scale(0.95); opacity: 0.5; }
-      50% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 8px currentColor; }
-      100% { transform: scale(0.95); opacity: 0.5; }
+      0% {
+        transform: scale(0.95);
+        opacity: 0.5;
+      }
+
+      50% {
+        transform: scale(1.2);
+        opacity: 1;
+        box-shadow: 0 0 8px currentColor;
+      }
+
+      100% {
+        transform: scale(0.95);
+        opacity: 0.5;
+      }
     }
 
     /* Progress Bar */
@@ -286,7 +306,8 @@
       width: 0%;
       background: linear-gradient(to right, var(--primary-color), var(--accent-color));
       transition: width 0.1s linear;
-      font-size: 0px; /* Hide text inside progress */
+      font-size: 0px;
+      /* Hide text inside progress */
     }
 
     /* Responsive Grid for Motor Panels */
@@ -432,9 +453,17 @@
     }
 
     @keyframes pulse-success-glow {
-      0% { box-shadow: 0 0 2px rgba(16, 185, 129, 0.2); }
-      50% { box-shadow: 0 0 12px rgba(16, 185, 129, 0.5); }
-      100% { box-shadow: 0 0 2px rgba(16, 185, 129, 0.2); }
+      0% {
+        box-shadow: 0 0 2px rgba(16, 185, 129, 0.2);
+      }
+
+      50% {
+        box-shadow: 0 0 12px rgba(16, 185, 129, 0.5);
+      }
+
+      100% {
+        box-shadow: 0 0 2px rgba(16, 185, 129, 0.2);
+      }
     }
 
     .btn-control.done {
@@ -506,7 +535,8 @@
       overflow-y: auto;
       font-family: var(--font-mono);
       font-size: 12px;
-      color: #34d399; /* Green terminal text */
+      color: #34d399;
+      /* Green terminal text */
       line-height: 1.6;
       margin-bottom: 16px;
       white-space: pre-wrap;
@@ -534,14 +564,17 @@
         align-items: flex-start;
         gap: 16px;
       }
+
       .actions-bar {
         width: 100%;
         justify-content: space-between;
       }
+
       .config-panel {
         flex-direction: column;
         align-items: stretch;
       }
+
       .config-group {
         justify-content: space-between;
       }
@@ -555,15 +588,29 @@
       <div class="brand-section">
         <div class="logo-icon">
           <!-- Stepper motor icon -->
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M20 12h2"/><path d="M2 12h2"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path
+              d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+            <circle cx="12" cy="12" r="4" />
+            <path d="M12 2v2" />
+            <path d="M12 20v2" />
+            <path d="M20 12h2" />
+            <path d="M2 12h2" />
+          </svg>
         </div>
         <h1 data-i18n="title">Modbus RTU 电机调试上位机</h1>
       </div>
-      
+
       <div class="actions-bar">
         <!-- Language Switcher -->
         <button id="langBtn" class="btn btn-secondary" onclick="toggleLanguage()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="2" y1="12" x2="22" y2="12" />
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+          </svg>
           <span id="langText">English</span>
         </button>
       </div>
@@ -581,7 +628,7 @@
           <option value="115200">115200</option>
         </select>
       </div>
-      
+
       <div class="config-group">
         <button id="connectBtn" class="btn btn-success" onclick="toggleConnection()" data-i18n="connect">连接串口</button>
         <span id="serialStatus" class="status-badge status-disconnected" data-i18n="statusDisconnected">
@@ -597,11 +644,18 @@
 
       <div class="config-group" style="margin-left: auto;">
         <button class="btn btn-secondary" onclick="readAllParams()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+          </svg>
           <span data-i18n="readAll">读取参数</span>
         </button>
         <button class="btn btn-secondary" onclick="toggleConsole()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="4 17 10 11 4 5" />
+            <line x1="12" y1="19" x2="20" y2="19" />
+          </svg>
           <span data-i18n="serialMonitor">串口监视器</span>
         </button>
       </div>
@@ -619,16 +673,21 @@
     <section id="console" style="display: none;">
       <div class="console-header">
         <h3 data-i18n="consoleTitle">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="4 17 10 11 4 5" />
+            <line x1="12" y1="19" x2="20" y2="19" />
+          </svg>
           <span>串口监视器</span>
         </h3>
-        <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;" onclick="clearConsole()" data-i18n="clear">
+        <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;" onclick="clearConsole()"
+          data-i18n="clear">
           清空
         </button>
       </div>
-      
+
       <pre id="consoleLog"></pre>
-      
+
       <div class="console-input-row">
         <label for="manualHex" data-i18n="manualSend">手动发送：</label>
         <input id="manualHex" placeholder="01 03 00 00 00 0A" data-i18n-placeholder="hexPlaceholder" />
@@ -681,7 +740,7 @@
         pollingStart: "启动轮询，间隔 "
       },
       en: {
-        title: "Modbus RTU Motor Tuning Assistant",
+        title: "Modbus RTU Motor Motor Tuner",
         connect: "Connect Serial",
         disconnect: "Disconnect",
         statusConnected: "Connected",
@@ -875,15 +934,15 @@
       try {
         port = await navigator.serial.requestPort();
         const baudRate = parseInt(document.getElementById("baudRate").value);
-        
+
         document.getElementById("serialStatus").className = "status-badge status-connecting";
         document.getElementById("serialStatus").setAttribute("data-i18n", "statusConnecting");
         updateLanguage();
-        
+
         await port.open({ baudRate });
         writer = port.writable.getWriter();
         reader = port.readable.getReader();
-        
+
         document.getElementById("serialStatus").className = "status-badge status-connected";
         document.getElementById("serialStatus").setAttribute("data-i18n", "statusConnected");
         document.getElementById("connectBtn").setAttribute("data-i18n", "disconnect");
@@ -913,9 +972,9 @@
         clearInterval(progressTimer);
         progressTimer = null;
       }
-      
+
       document.getElementById("progressFill").style.width = "0%";
-      
+
       if (reader) {
         try {
           await reader.cancel();
@@ -949,7 +1008,7 @@
       document.getElementById("connectBtn").setAttribute("data-i18n", "connect");
       document.getElementById("connectBtn").className = "btn btn-success";
       updateLanguage();
-      
+
       logConsole(i18n[currentLang].logDisconnected);
     }
 
@@ -967,14 +1026,14 @@
       }
     }
 
-    // 转换float32到两个寄存器的16位数数组（高位在前）
+    // 转换 float32 到两个寄存器的 16 位数数组（高位在前）
     function float32ToRegisters(val) {
       const buf = new DataView(new ArrayBuffer(4));
       buf.setFloat32(0, val, false);
       return [buf.getUint16(0), buf.getUint16(2)];
     }
 
-    // CRC16计算函数（Modbus标准）
+    // CRC16 计算函数（Modbus 标准）
     function crc16(buf) {
       let crc = 0xffff;
       for (let pos = 0; pos < buf.length; pos++) {
@@ -1045,17 +1104,17 @@
     function updateControlButtons(id) {
       const sw = statusWords[id];
       const cw = controlWords[id];
-      
+
       const enableBtn = document.getElementById(`enableBtn${id}`);
       const moveBtn = document.getElementById(`moveBtn${id}`);
       const initBtn = document.getElementById(`initBtn${id}`);
       const estopBtn = document.getElementById(`estopBtn${id}`);
-      
+
       enableBtn.classList.toggle("active", (sw & (1 << CONTROL_BITS.enable)) !== 0);
       moveBtn.classList.toggle("active", (sw & (1 << CONTROL_BITS.move)) !== 0);
       initBtn.classList.toggle("active", (cw & (1 << CONTROL_BITS.init)) !== 0);
       estopBtn.classList.toggle("estop", (cw & (1 << CONTROL_BITS.estop)) !== 0);
-      
+
       // 运动中动画
       if ((sw & (1 << 1)) !== 0) {
         moveBtn.classList.add("running");
@@ -1236,15 +1295,15 @@
           const speed = getFloat(offset + 8);  // 寄存器 4-5
           const accel = getFloat(offset + 12); // 寄存器 6-7
           const curPos = getFloat(offset + 16); // 寄存器 8-9
-          
+
           if (inital) {
             document.getElementById(`targetPos${i}`).value = targetPos.toFixed(1);
             document.getElementById(`speed${i}`).value = speed.toFixed(1);
             document.getElementById(`accel${i}`).value = accel.toFixed(1);
           }
-          
+
           document.getElementById(`pos${i}`).textContent = curPos.toFixed(1);
-          
+
           if (controlWords[i] & 0x04) {
             document.getElementById(`modeSelect${i}`).value = "abs";
           } else {
@@ -1279,10 +1338,10 @@
       if (!log) return;
       const now = new Date().toLocaleTimeString();
       log.textContent += `[${now}] ${msg}\n`;
-      
+
       // Auto scroll to bottom
       log.scrollTop = log.scrollHeight;
-      
+
       // Limit log size to 200 lines
       const lines = log.textContent.split('\n');
       if (lines.length > 200) {
@@ -1298,7 +1357,7 @@
       }
       const hexStr = document.getElementById("manualHex").value.trim();
       if (!hexStr) return;
-      
+
       try {
         const bytes = hexStr.split(/\s+/).map(b => {
           const parsed = parseInt(b, 16);

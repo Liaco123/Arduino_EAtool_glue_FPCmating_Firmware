@@ -2,821 +2,805 @@
 <html lang="zh">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title data-i18n="title">Modbus RTU 电机调试助手</title>
-
-  <!-- Import Google Fonts for premium typography -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
-    rel="stylesheet">
-
-  <style>
-    :root {
-      /* Deep space theme variables */
-      --bg-gradient: linear-gradient(135deg, #0b0f19 0%, #111827 100%);
-      --panel-bg: rgba(17, 24, 39, 0.75);
-      --card-bg: rgba(31, 41, 55, 0.45);
-      --card-border: rgba(255, 255, 255, 0.07);
-      --card-hover-border: rgba(59, 130, 246, 0.3);
-      --input-bg: rgba(15, 23, 42, 0.6);
-      --input-border: rgba(255, 255, 255, 0.12);
-      --input-focus: rgba(59, 130, 246, 0.5);
-
-      --text-primary: #f3f4f6;
-      --text-secondary: #9ca3af;
-      --text-muted: #6b7280;
-
-      /* Vibrant status colors */
-      --primary-color: #3b82f6;
-      --primary-hover: #2563eb;
-      --success-color: #10b981;
-      --success-hover: #059669;
-      --danger-color: #f43f5e;
-      --danger-hover: #e11d48;
-      --warning-color: #f59e0b;
-      --accent-color: #8b5cf6;
-
-      /* Typography tokens */
-      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      --font-heading: 'Outfit', sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
-
-      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.25), 0 4px 6px -2px rgba(0, 0, 0, 0.15);
-      --shadow-glow: 0 0 15px rgba(59, 130, 246, 0.2);
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    body {
-      background: var(--bg-gradient);
-      color: var(--text-primary);
-      font-family: var(--font-sans);
-      min-height: 100vh;
-      padding: 24px;
-      line-height: 1.5;
-    }
-
-    .container {
-      max-width: 1280px;
-      margin: 0 auto;
-    }
-
-    /* Header styling with modern layout */
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-bottom: 20px;
-      margin-bottom: 24px;
-      border-bottom: 1px solid var(--card-border);
-    }
-
-    .brand-section {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .logo-icon {
-      background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
-      width: 42px;
-      height: 42px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
-    }
-
-    h1 {
-      font-family: var(--font-heading);
-      font-size: 24px;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-      background: linear-gradient(to right, #f3f4f6, #9ca3af);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .actions-bar {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    /* Glassmorphism Configuration Panel */
-    .config-panel {
-      background: var(--panel-bg);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid var(--card-border);
-      border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 24px;
-      box-shadow: var(--shadow-lg);
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-      align-items: center;
-    }
-
-    .config-group {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    label {
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--text-secondary);
-      white-space: nowrap;
-    }
-
-    input,
-    select {
-      background: var(--input-bg);
-      border: 1px solid var(--input-border);
-      color: var(--text-primary);
-      border-radius: 8px;
-      padding: 8px 12px;
-      font-family: var(--font-sans);
-      font-size: 14px;
-      outline: none;
-    }
-
-    input:focus,
-    select:focus {
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
-    }
-
-    input[type="number"] {
-      width: 90px;
-    }
-
-    select {
-      cursor: pointer;
-      padding-right: 24px;
-    }
-
-    /* Standardized Buttons */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      font-family: var(--font-sans);
-      font-size: 14px;
-      font-weight: 600;
-      padding: 8px 16px;
-      border-radius: 8px;
-      border: 1px solid transparent;
-      cursor: pointer;
-      user-select: none;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .btn-primary {
-      background-color: var(--primary-color);
-      color: white;
-    }
-
-    .btn-primary:hover {
-      background-color: var(--primary-hover);
-      box-shadow: var(--shadow-glow);
-    }
-
-    .btn-success {
-      background-color: var(--success-color);
-      color: white;
-    }
-
-    .btn-success:hover {
-      background-color: var(--success-hover);
-      box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
-    }
-
-    .btn-danger {
-      background-color: var(--danger-color);
-      color: white;
-    }
-
-    .btn-danger:hover {
-      background-color: var(--danger-hover);
-      box-shadow: 0 0 15px rgba(244, 63, 94, 0.3);
-    }
-
-    .btn-secondary {
-      background-color: rgba(255, 255, 255, 0.08);
-      color: var(--text-primary);
-      border-color: rgba(255, 255, 255, 0.05);
-    }
-
-    .btn-secondary:hover {
-      background-color: rgba(255, 255, 255, 0.15);
-    }
-
-    .btn-block {
-      width: 100%;
-    }
-
-    /* Status Badges */
-    .status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 13px;
-      font-weight: 600;
-      padding: 4px 10px;
-      border-radius: 20px;
-    }
-
-    .status-disconnected {
-      background-color: rgba(244, 63, 94, 0.15);
-      color: var(--danger-color);
-      border: 1px solid rgba(244, 63, 94, 0.2);
-    }
-
-    .status-connecting {
-      background-color: rgba(245, 158, 11, 0.15);
-      color: var(--warning-color);
-      border: 1px solid rgba(245, 158, 11, 0.2);
-    }
-
-    .status-connected {
-      background-color: rgba(16, 185, 129, 0.15);
-      color: var(--success-color);
-      border: 1px solid rgba(16, 185, 129, 0.2);
-    }
-
-    .status-indicator-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background-color: currentColor;
-    }
-
-    .status-connected .status-indicator-dot {
-      animation: pulse-green 1.5s infinite;
-    }
-
-    @keyframes pulse-green {
-      0% {
-        transform: scale(0.95);
-        opacity: 0.5;
-      }
-
-      50% {
-        transform: scale(1.2);
-        opacity: 1;
-        box-shadow: 0 0 8px currentColor;
-      }
-
-      100% {
-        transform: scale(0.95);
-        opacity: 0.5;
-      }
-    }
-
-    /* Progress Bar */
-    #progressBar {
-      width: 100%;
-      height: 6px;
-      background-color: rgba(255, 255, 255, 0.05);
-      border-radius: 3px;
-      overflow: hidden;
-      margin-top: 12px;
-      position: relative;
-    }
-
-    #progressFill {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(to right, var(--primary-color), var(--accent-color));
-      transition: width 0.1s linear;
-      font-size: 0px;
-      /* Hide text inside progress */
-    }
-
-    /* Responsive Grid for Motor Panels */
-    .motors-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-      gap: 24px;
-      margin-bottom: 24px;
-    }
-
-    .motor-card {
-      background: var(--panel-bg);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid var(--card-border);
-      border-radius: 16px;
-      padding: 24px;
-      box-shadow: var(--shadow-lg);
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .motor-card:hover {
-      border-color: var(--card-hover-border);
-      box-shadow: 0 12px 20px -8px rgba(59, 130, 246, 0.15);
-    }
-
-    .motor-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 4px;
-      background: linear-gradient(to right, var(--primary-color), var(--accent-color));
-      opacity: 0.7;
-    }
-
-    .motor-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .motor-badge {
-      background: rgba(255, 255, 255, 0.07);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: var(--font-heading);
-      font-weight: 700;
-      color: var(--text-primary);
-    }
-
-    .motor-header h3 {
-      font-family: var(--font-heading);
-      font-size: 18px;
-      font-weight: 600;
-    }
-
-    .motor-body {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .input-row {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-    }
-
-    .input-field-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .input-field-group label {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-secondary);
-    }
-
-    .input-field-group input {
-      width: 100%;
-      padding: 8px;
-    }
-
-    /* Control Word Styling */
-    .control-section {
-      border-top: 1px solid var(--card-border);
-      padding-top: 16px;
-    }
-
-    .control-section h4 {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-secondary);
-      margin-bottom: 12px;
-    }
-
-    .control-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    /* Custom styles for toggled state */
-    .btn-control {
-      background-color: rgba(255, 255, 255, 0.05);
-      border-color: rgba(255, 255, 255, 0.07);
-      color: var(--text-primary);
-      font-size: 13px;
-      font-weight: 500;
-      padding: 8px 12px;
-    }
-
-    .btn-control:hover {
-      background-color: rgba(255, 255, 255, 0.1);
-    }
-
-    .btn-control.active {
-      background-color: rgba(59, 130, 246, 0.15) !important;
-      border-color: var(--primary-color) !important;
-      color: var(--primary-color);
-      box-shadow: 0 0 10px rgba(59, 130, 246, 0.15);
-    }
-
-    .btn-control.running {
-      border-color: var(--success-color) !important;
-      color: var(--success-color);
-      background-color: rgba(16, 185, 129, 0.08) !important;
-      animation: pulse-success-glow 1.5s infinite;
-    }
-
-    @keyframes pulse-success-glow {
-      0% {
-        box-shadow: 0 0 2px rgba(16, 185, 129, 0.2);
-      }
-
-      50% {
-        box-shadow: 0 0 12px rgba(16, 185, 129, 0.5);
-      }
-
-      100% {
-        box-shadow: 0 0 2px rgba(16, 185, 129, 0.2);
-      }
-    }
-
-    .btn-control.done {
-      background-color: rgba(59, 130, 246, 0.8) !important;
-      color: white;
-      border-color: var(--primary-color) !important;
-    }
-
-    .select-control {
-      width: 100%;
-      height: 38px;
-    }
-
-    /* Position Display */
-    .motor-footer {
-      border-top: 1px solid var(--card-border);
-      padding-top: 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .position-label {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text-secondary);
-    }
-
-    .position-display {
-      font-family: var(--font-mono);
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--success-color);
-      text-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
-    }
-
-    /* Serial Monitor Console */
-    #console {
-      background: #020617;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: var(--shadow-lg);
-      margin-top: 24px;
-    }
-
-    .console-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-
-    .console-header h3 {
-      font-family: var(--font-heading);
-      font-size: 16px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    #consoleLog {
-      background: rgba(0, 0, 0, 0.5);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: 8px;
-      padding: 12px;
-      height: 200px;
-      overflow-y: auto;
-      font-family: var(--font-mono);
-      font-size: 12px;
-      color: #34d399;
-      /* Green terminal text */
-      line-height: 1.6;
-      margin-bottom: 16px;
-      white-space: pre-wrap;
-    }
-
-    .console-input-row {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-    }
-
-    .console-input-row label {
-      font-size: 13px;
-    }
-
-    .console-input-row input {
-      flex: 1;
-      font-family: var(--font-mono);
-    }
-
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-      header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 16px;
-      }
-
-      .actions-bar {
-        width: 100%;
-        justify-content: space-between;
-      }
-
-      .config-panel {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      .config-group {
-        justify-content: space-between;
-      }
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title data-i18n="title">Modbus RTU 电机调试助手</title>
+
+    <!-- Import Google Fonts for premium typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            /* Deep space theme variables */
+            --bg-gradient: linear-gradient(135deg, #0b0f19 0%, #111827 100%);
+            --panel-bg: rgba(17, 24, 39, 0.75);
+            --card-bg: rgba(31, 41, 55, 0.45);
+            --card-border: rgba(255, 255, 255, 0.07);
+            --card-hover-border: rgba(59, 130, 246, 0.3);
+            --input-bg: rgba(15, 23, 42, 0.6);
+            --input-border: rgba(255, 255, 255, 0.12);
+            --input-focus: rgba(59, 130, 246, 0.5);
+
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --text-muted: #6b7280;
+
+            /* Vibrant status colors */
+            --primary-color: #3b82f6;
+            --primary-hover: #2563eb;
+            --success-color: #10b981;
+            --success-hover: #059669;
+            --danger-color: #f43f5e;
+            --danger-hover: #e11d48;
+            --warning-color: #f59e0b;
+            --accent-color: #8b5cf6;
+
+            /* Typography tokens */
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --font-heading: 'Outfit', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.25), 0 4px 6px -2px rgba(0, 0, 0, 0.15);
+            --shadow-glow: 0 0 15px rgba(59, 130, 246, 0.2);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            min-height: 100vh;
+            padding: 24px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        /* Header styling with modern layout */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 20px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .brand-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+        }
+
+        h1 {
+            font-family: var(--font-heading);
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #f3f4f6, #9ca3af);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .actions-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Glassmorphism Configuration Panel */
+        .config-panel {
+            background: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .config-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        label {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        input,
+        select {
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            color: var(--text-primary);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-family: var(--font-sans);
+            font-size: 14px;
+            outline: none;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+        }
+
+        input[type="number"] {
+            width: 90px;
+        }
+
+        select {
+            cursor: pointer;
+            padding-right: 24px;
+        }
+
+        /* Standardized Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-family: var(--font-sans);
+            font-size: 14px;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: var(--success-hover);
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: var(--danger-hover);
+            box-shadow: 0 0 15px rgba(244, 63, 94, 0.3);
+        }
+
+        .btn-secondary {
+            background-color: rgba(255, 255, 255, 0.08);
+            color: var(--text-primary);
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        .status-disconnected {
+            background-color: rgba(244, 63, 94, 0.15);
+            color: var(--danger-color);
+            border: 1px solid rgba(244, 63, 94, 0.2);
+        }
+
+        .status-connecting {
+            background-color: rgba(245, 158, 11, 0.15);
+            color: var(--warning-color);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .status-connected {
+            background-color: rgba(16, 185, 129, 0.15);
+            color: var(--success-color);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .status-indicator-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: currentColor;
+        }
+
+        .status-connected .status-indicator-dot {
+            animation: pulse-green 1.5s infinite;
+        }
+
+        @keyframes pulse-green {
+            0% {
+                transform: scale(0.95);
+                opacity: 0.5;
+            }
+
+            50% {
+                transform: scale(1.2);
+                opacity: 1;
+                box-shadow: 0 0 8px currentColor;
+            }
+
+            100% {
+                transform: scale(0.95);
+                opacity: 0.5;
+            }
+        }
+
+
+
+        /* Responsive Grid for Motor Panels */
+        .motors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .motor-card {
+            background: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .motor-card:hover {
+            border-color: var(--card-hover-border);
+            box-shadow: 0 12px 20px -8px rgba(59, 130, 246, 0.15);
+        }
+
+        .motor-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary-color), var(--accent-color));
+            opacity: 0.7;
+        }
+
+        .motor-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .motor-badge {
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-heading);
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .motor-header h3 {
+            font-family: var(--font-heading);
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .motor-body {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .input-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .input-field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .input-field-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .input-field-group input {
+            width: 100%;
+            padding: 8px;
+        }
+
+        /* Control Word Styling */
+        .control-section {
+            border-top: 1px solid var(--card-border);
+            padding-top: 16px;
+        }
+
+        .control-section h4 {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        /* Custom styles for toggled state */
+        .btn-control {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.07);
+            color: var(--text-primary);
+            font-size: 13px;
+            font-weight: 500;
+            padding: 8px 12px;
+        }
+
+        .btn-control:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-control.active {
+            background-color: rgba(59, 130, 246, 0.15) !important;
+            border-color: var(--primary-color) !important;
+            color: var(--primary-color);
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.15);
+        }
+
+        .btn-control.running {
+            border-color: var(--success-color) !important;
+            color: var(--success-color);
+            background-color: rgba(16, 185, 129, 0.08) !important;
+            animation: pulse-success-glow 1.5s infinite;
+        }
+
+        @keyframes pulse-success-glow {
+            0% {
+                box-shadow: 0 0 2px rgba(16, 185, 129, 0.2);
+            }
+
+            50% {
+                box-shadow: 0 0 12px rgba(16, 185, 129, 0.5);
+            }
+
+            100% {
+                box-shadow: 0 0 2px rgba(16, 185, 129, 0.2);
+            }
+        }
+
+        .btn-control.done {
+            background-color: rgba(59, 130, 246, 0.8) !important;
+            color: white;
+            border-color: var(--primary-color) !important;
+        }
+
+        .select-control {
+            width: 100%;
+            height: 38px;
+        }
+
+        /* Position Display */
+        .motor-footer {
+            border-top: 1px solid var(--card-border);
+            padding-top: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .position-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .position-display {
+            font-family: var(--font-mono);
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--success-color);
+            text-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
+        }
+
+        /* Serial Monitor Console */
+        #console {
+            background: #020617;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: var(--shadow-lg);
+            margin-top: 24px;
+        }
+
+        .console-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .console-header h3 {
+            font-family: var(--font-heading);
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #consoleLog {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 12px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: #34d399;
+            /* Green terminal text */
+            line-height: 1.6;
+            margin-bottom: 16px;
+            white-space: pre-wrap;
+        }
+
+        .console-input-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .console-input-row label {
+            font-size: 13px;
+        }
+
+        .console-input-row input {
+            flex: 1;
+            font-family: var(--font-mono);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+
+            .actions-bar {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .config-panel {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .config-group {
+                justify-content: space-between;
+            }
+        }
+    </style>
 </head>
 
 <body>
-  <div class="container">
-    <header>
-      <div class="brand-section">
-        <div class="logo-icon">
-          <!-- Stepper motor icon -->
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path
-              d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-            <circle cx="12" cy="12" r="4" />
-            <path d="M12 2v2" />
-            <path d="M12 20v2" />
-            <path d="M20 12h2" />
-            <path d="M2 12h2" />
-          </svg>
-        </div>
-        <h1 data-i18n="title">Modbus RTU 电机调试助手</h1>
-      </div>
+    <div class="container">
+        <header>
+            <div class="brand-section">
+                <div class="logo-icon">
+                    <!-- Stepper motor icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                        <circle cx="12" cy="12" r="4" />
+                        <path d="M12 2v2" />
+                        <path d="M12 20v2" />
+                        <path d="M20 12h2" />
+                        <path d="M2 12h2" />
+                    </svg>
+                </div>
+                <h1 data-i18n="title">Modbus RTU 电机调试助手</h1>
+            </div>
 
-      <div class="actions-bar">
-        <!-- Language Switcher -->
-        <button id="langBtn" class="btn btn-secondary" onclick="toggleLanguage()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10" />
-            <line x1="2" y1="12" x2="22" y2="12" />
-            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-          </svg>
-          <span id="langText">English</span>
-        </button>
-      </div>
-    </header>
+            <div class="actions-bar">
+                <!-- Language Switcher -->
+                <button id="langBtn" class="btn btn-secondary" onclick="toggleLanguage()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="2" y1="12" x2="22" y2="12" />
+                        <path
+                            d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                    </svg>
+                    <span id="langText">English</span>
+                </button>
+            </div>
+        </header>
 
-    <!-- Configuration panel -->
-    <section class="config-panel">
-      <div class="config-group">
-        <label for="baudRate" data-i18n="baudRate">波特率：</label>
-        <select id="baudRate">
-          <option value="9600" selected>9600</option>
-          <option value="19200">19200</option>
-          <option value="38400">38400</option>
-          <option value="57600">57600</option>
-          <option value="115200">115200</option>
-        </select>
-      </div>
+        <!-- Configuration panel -->
+        <section class="config-panel">
+            <div class="config-group">
+                <label for="baudRate" data-i18n="baudRate">波特率：</label>
+                <select id="baudRate">
+                    <option value="9600">9600</option>
+                    <option value="19200">19200</option>
+                    <option value="38400">38400</option>
+                    <option value="57600">57600</option>
+                    <option value="115200" selected>115200</option>
+                </select>
+            </div>
 
-      <div class="config-group">
-        <button id="connectBtn" class="btn btn-success" onclick="toggleConnection()" data-i18n="connect">连接串口</button>
-        <span id="serialStatus" class="status-badge status-disconnected" data-i18n="statusDisconnected">
-          <span class="status-indicator-dot"></span>
-          <span>未连接</span>
-        </span>
-      </div>
+            <div class="config-group">
+                <button id="connectBtn" class="btn btn-success" onclick="toggleConnection()"
+                    data-i18n="connect">连接串口</button>
+                <span id="serialStatus" class="status-badge status-disconnected" data-i18n="statusDisconnected">
+                    <span class="status-indicator-dot"></span>
+                    <span>未连接</span>
+                </span>
+            </div>
 
-      <div class="config-group">
-        <label for="pollingInterval" data-i18n="pollingInterval">轮询间隔 (ms):</label>
-        <input type="number" id="pollingInterval" value="1000" min="100" step="100" />
-      </div>
+            <div class="config-group">
+                <label for="pollingInterval" data-i18n="pollingInterval">轮询间隔 (ms):</label>
+                <input type="number" id="pollingInterval" value="50" min="10" step="10" />
+            </div>
 
-      <div class="config-group" style="margin-left: auto;">
-        <button class="btn btn-secondary" onclick="readAllParams()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
-          </svg>
-          <span data-i18n="readAll">读取参数</span>
-        </button>
-        <button class="btn btn-secondary" onclick="toggleConsole()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="4 17 10 11 4 5" />
-            <line x1="12" y1="19" x2="20" y2="19" />
-          </svg>
-          <span data-i18n="serialMonitor">串口监视器</span>
-        </button>
-      </div>
+            <div class="config-group" style="margin-left: auto;">
+                <button class="btn btn-secondary" onclick="readAllParams()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+                    </svg>
+                    <span data-i18n="readAll">读取参数</span>
+                </button>
+                <button class="btn btn-secondary" onclick="toggleConsole()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="4 17 10 11 4 5" />
+                        <line x1="12" y1="19" x2="20" y2="19" />
+                    </svg>
+                    <span data-i18n="serialMonitor">串口监视器</span>
+                </button>
+            </div>
 
-      <!-- Communication active progress bar -->
-      <div id="progressBar">
-        <div id="progressFill">0%</div>
-      </div>
-    </section>
 
-    <!-- Motor panels container -->
-    <main class="motors-grid" id="motors"></main>
+        </section>
 
-    <!-- Serial Monitor Panel -->
-    <section id="console" style="display: none;">
-      <div class="console-header">
-        <h3 data-i18n="consoleTitle">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="4 17 10 11 4 5" />
-            <line x1="12" y1="19" x2="20" y2="19" />
-          </svg>
-          <span>串口监视器</span>
-        </h3>
-        <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;" onclick="clearConsole()"
-          data-i18n="clear">
-          清空
-        </button>
-      </div>
+        <!-- Motor panels container -->
+        <main class="motors-grid" id="motors"></main>
 
-      <pre id="consoleLog"></pre>
+        <!-- Serial Monitor Panel -->
+        <section id="console" style="display: none;">
+            <div class="console-header">
+                <h3 data-i18n="consoleTitle">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="4 17 10 11 4 5" />
+                        <line x1="12" y1="19" x2="20" y2="19" />
+                    </svg>
+                    <span>串口监视器</span>
+                </h3>
+                <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 12px;" onclick="clearConsole()"
+                    data-i18n="clear">
+                    清空
+                </button>
+            </div>
 
-      <div class="console-input-row">
-        <label for="manualHex" data-i18n="manualSend">手动发送：</label>
-        <input id="manualHex" placeholder="01 03 00 00 00 0A" data-i18n-placeholder="hexPlaceholder" />
-        <button class="btn btn-primary" onclick="manualSend()" data-i18n="send">发送</button>
-      </div>
-    </section>
-  </div>
+            <pre id="consoleLog"></pre>
 
-  <script>
-    // i18n Translation Dictionary
-    const i18n = {
-      zh: {
-        title: "Modbus RTU 电机调试助手",
-        connect: "连接串口",
-        disconnect: "断开连接",
-        statusConnected: "已连接",
-        statusDisconnected: "未连接",
-        statusConnecting: "正在连接...",
-        baudRate: "波特率：",
-        pollingInterval: "轮询间隔 (ms)：",
-        serialMonitor: "串口监视器",
-        readAll: "读取参数",
-        motorTitle: "电机",
-        targetPos: "目标位置",
-        speed: "运行速度",
-        accel: "加速度",
-        sendParams: "发送参数",
-        controlWord: "控制字操作",
-        enable: "使能",
-        move: "运动",
-        modeRel: "相对",
-        modeAbs: "绝对",
-        init: "初始化",
-        estop: "急停",
-        currentPos: "当前位置：",
-        consoleTitle: "串口监视器控制台",
-        manualSend: "手动发送 (HEX)：",
-        send: "发送",
-        clear: "清空日志",
-        hexPlaceholder: "例如：01 03 00 00 00 0A",
-        alertUnconnected: "请先连接串口！",
-        alertConnectFail: "串口连接失败：",
-        verifying: "正在验证设备类型...",
-        verificationSuccess: "设备验证成功，电机控制板已就绪。",
-        verificationFailed: "设备验证失败！未检测到正确的电机控制板，请检查串口连接。",
-        logConnected: "串口已成功打开",
-        logDisconnected: "串口已关闭",
-        logSent: "发送：",
-        logReceived: "接收数据：",
-        logReadError: "读取异常：",
-        unsupportedFunc: "不支持的功能码：",
-        crcFailed: "CRC 校验失败，丢弃一字节",
-        pollingStart: "启动轮询，间隔 "
-      },
-      en: {
-        title: "Modbus RTU Motor Tuner",
-        connect: "Connect Serial",
-        disconnect: "Disconnect",
-        statusConnected: "Connected",
-        statusDisconnected: "Disconnected",
-        statusConnecting: "Connecting...",
-        baudRate: "Baud Rate: ",
-        pollingInterval: "Poll Int. (ms):",
-        serialMonitor: "Serial Monitor",
-        readAll: "Read Params",
-        motorTitle: "Motor",
-        targetPos: "Target Pos",
-        speed: "Speed",
-        accel: "Acceleration",
-        sendParams: "Send Parameters",
-        controlWord: "Control Actions",
-        enable: "Enable",
-        move: "Move",
-        modeRel: "Relative",
-        modeAbs: "Absolute",
-        init: "Initialize",
-        estop: "E-Stop",
-        currentPos: "Current Pos: ",
-        consoleTitle: "Serial Monitor Console",
-        manualSend: "Manual Send (HEX):",
-        send: "Send",
-        clear: "Clear Logs",
-        hexPlaceholder: "e.g. 01 03 00 00 00 0A",
-        alertUnconnected: "Please connect the serial port first!",
-        alertConnectFail: "Serial connection failed: ",
-        verifying: "Verifying device type...",
-        verificationSuccess: "Device verified successfully. Motor control board is ready.",
-        verificationFailed: "Device verification failed! Correct motor control board not detected, please check serial connection.",
-        logConnected: "Serial port opened successfully",
-        logDisconnected: "Serial port closed",
-        logSent: "Sent: ",
-        logReceived: "Received: ",
-        logReadError: "Read Exception: ",
-        unsupportedFunc: "Unsupported function code: ",
-        crcFailed: "CRC check failed, discarding byte",
-        pollingStart: "Started polling, interval "
-      }
-    };
+            <div class="console-input-row">
+                <label for="manualHex" data-i18n="manualSend">手动发送：</label>
+                <input id="manualHex" placeholder="01 03 00 00 00 0A" data-i18n-placeholder="hexPlaceholder" />
+                <button class="btn btn-primary" onclick="manualSend()" data-i18n="send">发送</button>
+            </div>
+        </section>
+    </div>
 
-    let currentLang = localStorage.getItem("lang") || "zh";
+    <script>
+        // i18n Translation Dictionary
+        const i18n = {
+            zh: {
+                title: "Modbus RTU 电机调试助手",
+                connect: "连接串口",
+                disconnect: "断开连接",
+                statusConnected: "已连接",
+                statusDisconnected: "未连接",
+                statusConnecting: "正在连接...",
+                baudRate: "波特率：",
+                pollingInterval: "轮询间隔 (ms)：",
+                serialMonitor: "串口监视器",
+                readAll: "读取参数",
+                motor0Title: "夹紧电机 (M1)",
+                motor1Title: "放卷电机 (M2)",
+                motor2Title: "顶升电机 (M3)",
+                targetPos: "目标位置",
+                speed: "运行速度",
+                accel: "加速度",
+                sendParams: "发送参数",
+                controlWord: "控制字操作",
+                enable: "使能",
+                move: "运动",
+                modeRel: "相对",
+                modeAbs: "绝对",
+                init: "初始化",
+                estop: "急停",
+                currentPos: "当前位置：",
+                consoleTitle: "串口监视器控制台",
+                manualSend: "手动发送 (HEX)：",
+                send: "发送",
+                clear: "清空日志",
+                hexPlaceholder: "例如：01 03 00 00 00 0A",
+                alertUnconnected: "请先连接串口！",
+                alertConnectFail: "串口连接失败：",
+                verifying: "正在验证设备类型...",
+                verificationSuccess: "设备验证成功，电机控制板已就绪。",
+                verificationFailed: "设备验证失败！未检测到正确的电机控制板，请检查串口连接。",
+                logConnected: "串口已成功打开",
+                logDisconnected: "串口已关闭",
+                logSent: "发送：",
+                logReceived: "接收数据：",
+                logReadError: "读取异常：",
+                unsupportedFunc: "不支持的功能码：",
+                crcFailed: "CRC 校验失败，丢弃一字节",
+                pollingStart: "启动轮询，间隔 "
+            },
+            en: {
+                title: "Modbus RTU Motor Tuner",
+                connect: "Connect Serial",
+                disconnect: "Disconnect",
+                statusConnected: "Connected",
+                statusDisconnected: "Disconnected",
+                statusConnecting: "Connecting...",
+                baudRate: "Baud Rate: ",
+                pollingInterval: "Poll Int. (ms):",
+                serialMonitor: "Serial Monitor",
+                readAll: "Read Params",
+                motor0Title: "Clamping Motor (M1)",
+                motor1Title: "Unwinding Motor (M2)",
+                motor2Title: "Lifter Motor (M3)",
+                targetPos: "Target Pos",
+                speed: "Speed",
+                accel: "Acceleration",
+                sendParams: "Send Parameters",
+                controlWord: "Control Actions",
+                enable: "Enable",
+                move: "Move",
+                modeRel: "Relative",
+                modeAbs: "Absolute",
+                init: "Initialize",
+                estop: "E-Stop",
+                currentPos: "Current Pos: ",
+                consoleTitle: "Serial Monitor Console",
+                manualSend: "Manual Send (HEX):",
+                send: "Send",
+                clear: "Clear Logs",
+                hexPlaceholder: "e.g. 01 03 00 00 00 0A",
+                alertUnconnected: "Please connect the serial port first!",
+                alertConnectFail: "Serial connection failed: ",
+                verifying: "Verifying device type...",
+                verificationSuccess: "Device verified successfully. Motor control board is ready.",
+                verificationFailed: "Device verification failed! Correct motor control board not detected, please check serial connection.",
+                logConnected: "Serial port opened successfully",
+                logDisconnected: "Serial port closed",
+                logSent: "Sent: ",
+                logReceived: "Received: ",
+                logReadError: "Read Exception: ",
+                unsupportedFunc: "Unsupported function code: ",
+                crcFailed: "CRC check failed, discarding byte",
+                pollingStart: "Started polling, interval "
+            }
+        };
 
-    const motorCount = 3; // 电机数量
-    let port, writer, reader;
-    let pollingTimer, progressTimer;
-    let progressVal = 0;
-    let controlWords = new Array(motorCount).fill(0);
-    let serialBuffer = [];
-    let statusWords = new Array(motorCount).fill(0);
-    let inital = true;
+        let currentLang = localStorage.getItem("lang") || "zh";
 
-    // 控制字各位定义
-    const CONTROL_BITS = {
-      enable: 0,
-      move: 1,
-      abs: 2,
-      init: 3,
-      estop: 4,
-    };
+        const motorCount = 3; // 电机数量
+        let port, writer, reader;
+        let pollingTimer;
+        let controlWords = new Array(motorCount).fill(0);
+        let serialBuffer = [];
+        let statusWords = new Array(motorCount).fill(0);
+        let inital = true;
 
-    // UI - 创建电机面板（带有 data-i18n 属性以支持动态翻译）
-    function createMotorUI(id) {
-      const div = document.createElement("div");
-      div.className = "motor-card";
-      div.id = `motorCard${id}`;
-      div.innerHTML = `
+        // 控制字各位定义
+        const CONTROL_BITS = {
+            enable: 0,
+            move: 1,
+            abs: 2,
+            init: 3,
+            estop: 4,
+        };
+
+        // UI - 创建电机面板（带有 data-i18n 属性以支持动态翻译）
+        function createMotorUI(id) {
+            const div = document.createElement("div");
+            div.className = "motor-card";
+            div.id = `motorCard${id}`;
+            div.innerHTML = `
         <div class="motor-header">
           <div class="motor-badge">M${id + 1}</div>
-          <h3><span data-i18n="motorTitle">电机</span> ${id + 1}</h3>
+          <h3><span data-i18n="motor${id}Title">电机 ${id + 1}</span></h3>
         </div>
         <div class="motor-body">
           <div class="input-row">
@@ -867,651 +851,627 @@
           </div>
         </div>
       `;
-      return div;
-    }
+            return div;
+        }
 
-    // 初始化电机 UI
-    const motorsDiv = document.getElementById("motors");
-    for (let i = 0; i < motorCount; i++) {
-      motorsDiv.appendChild(createMotorUI(i));
-    }
+        // 初始化电机 UI
+        const motorsDiv = document.getElementById("motors");
+        for (let i = 0; i < motorCount; i++) {
+            motorsDiv.appendChild(createMotorUI(i));
+        }
 
-    // 初始化语言
-    updateLanguage();
+        // 初始化语言
+        updateLanguage();
 
-    function updateLanguage() {
-      // 遍历所有有 data-i18n 的元素
-      document.querySelectorAll("[data-i18n]").forEach(el => {
-        const key = el.getAttribute("data-i18n");
-        // 对于复合结构，可能包含 SVG 图标。这里如果子元素有带有 i18n 属性的标签，我们会精细处理
-        const textSpan = el.querySelector("span:not(.status-indicator-dot)");
-        if (textSpan) {
-          if (i18n[currentLang][key]) {
-            textSpan.textContent = i18n[currentLang][key];
-          }
-        } else {
-          if (i18n[currentLang][key]) {
-            // 检查是否有子元素是状态指示小圆点，如果有，保留它
-            const dot = el.querySelector(".status-indicator-dot");
-            if (dot) {
-              el.innerHTML = "";
-              el.appendChild(dot);
-              const label = document.createElement("span");
-              label.textContent = i18n[currentLang][key];
-              el.appendChild(label);
-            } else {
-              el.textContent = i18n[currentLang][key];
+        function updateLanguage() {
+            // 遍历所有有 data-i18n 的元素
+            document.querySelectorAll("[data-i18n]").forEach(el => {
+                const key = el.getAttribute("data-i18n");
+                // 对于复合结构，可能包含 SVG 图标。这里如果子元素有带有 i18n 属性的标签，我们会精细处理
+                const textSpan = el.querySelector("span:not(.status-indicator-dot)");
+                if (textSpan) {
+                    if (i18n[currentLang][key]) {
+                        textSpan.textContent = i18n[currentLang][key];
+                    }
+                } else {
+                    if (i18n[currentLang][key]) {
+                        // 检查是否有子元素是状态指示小圆点，如果有，保留它
+                        const dot = el.querySelector(".status-indicator-dot");
+                        if (dot) {
+                            el.innerHTML = "";
+                            el.appendChild(dot);
+                            const label = document.createElement("span");
+                            label.textContent = i18n[currentLang][key];
+                            el.appendChild(label);
+                        } else {
+                            el.textContent = i18n[currentLang][key];
+                        }
+                    }
+                }
+            });
+
+            // 遍历带有 placeholder 翻译的元素
+            document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+                const key = el.getAttribute("data-i18n-placeholder");
+                if (i18n[currentLang][key]) {
+                    el.setAttribute("placeholder", i18n[currentLang][key]);
+                }
+            });
+
+            // 更新语言切换按钮文本
+            const langText = document.getElementById("langText");
+            langText.textContent = currentLang === "zh" ? "English" : "中文";
+            document.documentElement.lang = currentLang;
+        }
+
+        function toggleLanguage() {
+            currentLang = currentLang === "zh" ? "en" : "zh";
+            localStorage.setItem("lang", currentLang);
+            updateLanguage();
+        }
+
+        // 检查并提示连接串口
+        function checkConnection() {
+            if (!port || !writer) {
+                alert(i18n[currentLang].alertUnconnected);
+                return false;
             }
-          }
-        }
-      });
-
-      // 遍历带有 placeholder 翻译的元素
-      document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
-        const key = el.getAttribute("data-i18n-placeholder");
-        if (i18n[currentLang][key]) {
-          el.setAttribute("placeholder", i18n[currentLang][key]);
-        }
-      });
-
-      // 更新语言切换按钮文本
-      const langText = document.getElementById("langText");
-      langText.textContent = currentLang === "zh" ? "English" : "中文";
-      document.documentElement.lang = currentLang;
-    }
-
-    function toggleLanguage() {
-      currentLang = currentLang === "zh" ? "en" : "zh";
-      localStorage.setItem("lang", currentLang);
-      updateLanguage();
-    }
-
-    // 检查并提示连接串口
-    function checkConnection() {
-      if (!port || !writer) {
-        alert(i18n[currentLang].alertUnconnected);
-        return false;
-      }
-      return true;
-    }
-
-    // 串口连接开关
-    async function toggleConnection() {
-      if (port) {
-        await disconnectSerial();
-      } else {
-        await connectSerial();
-      }
-    }
-
-    // 串口连接
-    async function connectSerial() {
-      inital = true;
-      try {
-        port = await navigator.serial.requestPort();
-        const baudRate = parseInt(document.getElementById("baudRate").value);
-
-        document.getElementById("serialStatus").className = "status-badge status-connecting";
-        document.getElementById("serialStatus").setAttribute("data-i18n", "statusConnecting");
-        updateLanguage();
-
-        await port.open({ baudRate });
-        writer = port.writable.getWriter();
-        reader = port.readable.getReader();
-
-        // 启动后台读取循环，为验证数据接收做准备
-        readSerialLoop();
-
-        // 开始进行设备验证
-        logConsole(i18n[currentLang].verifying);
-        const verified = await verifyDeviceConnection();
-        if (!verified) {
-          alert(i18n[currentLang].verificationFailed);
-          await disconnectSerial();
-          return;
+            return true;
         }
 
-        logConsole(i18n[currentLang].verificationSuccess);
-
-        document.getElementById("serialStatus").className = "status-badge status-connected";
-        document.getElementById("serialStatus").setAttribute("data-i18n", "statusConnected");
-        document.getElementById("connectBtn").setAttribute("data-i18n", "disconnect");
-        document.getElementById("connectBtn").className = "btn btn-danger";
-        updateLanguage();
-
-        logConsole(i18n[currentLang].logConnected);
-
-        startPolling();
-      } catch (e) {
-        alert(i18n[currentLang].alertConnectFail + e);
-        await disconnectSerial();
-      }
-    }
-
-    // 断开串口
-    async function disconnectSerial() {
-      if (pollingTimer) {
-        clearInterval(pollingTimer);
-        pollingTimer = null;
-      }
-      if (progressTimer) {
-        clearInterval(progressTimer);
-        progressTimer = null;
-      }
-
-      document.getElementById("progressFill").style.width = "0%";
-
-      if (reader) {
-        try {
-          await reader.cancel();
-          reader.releaseLock();
-        } catch (e) {
-          console.error("Error releasing reader:", e);
-        }
-        reader = null;
-      }
-
-      if (writer) {
-        try {
-          writer.releaseLock();
-        } catch (e) {
-          console.error("Error releasing writer:", e);
-        }
-        writer = null;
-      }
-
-      if (port) {
-        try {
-          await port.close();
-        } catch (e) {
-          console.error("Error closing port:", e);
-        }
-        port = null;
-      }
-
-      document.getElementById("serialStatus").className = "status-badge status-disconnected";
-      document.getElementById("serialStatus").setAttribute("data-i18n", "statusDisconnected");
-      document.getElementById("connectBtn").setAttribute("data-i18n", "connect");
-      document.getElementById("connectBtn").className = "btn btn-success";
-      updateLanguage();
-
-      logConsole(i18n[currentLang].logDisconnected);
-    }
-
-    async function readSerialLoop() {
-      while (reader) {
-        try {
-          const { value, done } = await reader.read();
-          if (done || !value) break;
-          serialBuffer.push(...value);
-          parseSerialBuffer();
-        } catch (e) {
-          logConsole(i18n[currentLang].logReadError + (e.message || e));
-          break;
-        }
-      }
-    }
-
-    // --- 设备验证辅助逻辑 ---
-    let pendingResponseResolver = null;
-
-    function buildCustomReadRequest(startAddr, regCount = 1) {
-      const payload = [0x01, 0x03, startAddr >> 8, startAddr & 0xff, regCount >> 8, regCount & 0xff];
-      const crc = crc16(payload);
-      return new Uint8Array([...payload, crc & 0xff, crc >> 8]);
-    }
-
-    function sendAndWaitResponse(frame, timeoutMs = 800) {
-      return new Promise((resolve) => {
-        let timeoutTimer = setTimeout(() => {
-          pendingResponseResolver = null;
-          resolve({ success: false, timeout: true });
-        }, timeoutMs);
-
-        pendingResponseResolver = (result) => {
-          clearTimeout(timeoutTimer);
-          pendingResponseResolver = null;
-          resolve(result);
-        };
-
-        logConsole(i18n[currentLang].logSent + [...frame].map((b) => b.toString(16).padStart(2, "0")).join(" "));
-        writer.write(frame).catch(err => {
-          clearTimeout(timeoutTimer);
-          pendingResponseResolver = null;
-          resolve({ success: false, error: err });
-        });
-      });
-    }
-
-    async function verifyDeviceConnection() {
-      // 1. 验证第一个寄存器地址 (0)
-      const frame0 = buildCustomReadRequest(0, 1);
-      const res0 = await sendAndWaitResponse(frame0, 1000);
-      if (!res0.success) {
-        logConsole("Verification failed: Register 0 read failed.");
-        return false;
-      }
-
-      // 2. 验证最后一个寄存器地址 (29)
-      const frame29 = buildCustomReadRequest(29, 1);
-      const res29 = await sendAndWaitResponse(frame29, 1000);
-      if (!res29.success) {
-        logConsole("Verification failed: Register 29 read failed.");
-        return false;
-      }
-
-      // 3. 验证最后一个寄存器后一个地址 (30)，期望响应异常且异常码为 02
-      const frame30 = buildCustomReadRequest(30, 1);
-      const res30 = await sendAndWaitResponse(frame30, 1000);
-
-      if (res30.success) {
-        logConsole("Verification failed: Register 30 exists, wrong device connected.");
-        return false;
-      }
-
-      if (res30.exceptionCode !== 2) {
-        logConsole("Verification failed: Register 30 did not return Modbus exception code 02 (got: " + res30.exceptionCode + ").");
-        return false;
-      }
-
-      return true;
-    }
-    // -------------------------
-
-    // 转换 float32 到两个寄存器的 16 位数数组（高位在前）
-    function float32ToRegisters(val) {
-      const buf = new DataView(new ArrayBuffer(4));
-      buf.setFloat32(0, val, false);
-      return [buf.getUint16(0), buf.getUint16(2)];
-    }
-
-    // CRC16 计算函数（Modbus 标准）
-    function crc16(buf) {
-      let crc = 0xffff;
-      for (let pos = 0; pos < buf.length; pos++) {
-        crc ^= buf[pos];
-        for (let i = 8; i !== 0; i--) {
-          if ((crc & 0x0001) !== 0) {
-            crc >>= 1;
-            crc ^= 0xa001;
-          } else crc >>= 1;
-        }
-      }
-      return crc;
-    }
-
-    // 构建 Modbus 请求帧
-    function buildModbusRequest(id, func, startAddr, values = []) {
-      const slaveAddr = 0x01; // 所有电机共用一个从机地址
-      const baseAddr = id * 10 + startAddr; // 电机寄存器偏移
-      const payload = [slaveAddr, func, baseAddr >> 8, baseAddr & 0xff];
-      if (func === 0x03) {
-        // 读寄存器，固定读 10 个寄存器
-        payload.push(0x00, 0x0a);
-      } else if (func === 0x10) {
-        // 写多个寄存器
-        const regCount = values.length;
-        payload.push(0x00, regCount, regCount * 2);
-        for (const val of values) {
-          payload.push(val >> 8, val & 0xff);
-        }
-      }
-      const crc = crc16(payload);
-      // 注意：CRC 低字节先发，高字节后发
-      return new Uint8Array([...payload, crc & 0xff, crc >> 8]);
-    }
-
-    // 发送 Modbus 命令
-    async function sendModbus(id, func, startAddr, values = []) {
-      if (!writer) {
-        logConsole(i18n[currentLang].alertUnconnected);
-        return;
-      }
-      const req = buildModbusRequest(id, func, startAddr, values);
-      logConsole(i18n[currentLang].logSent + [...req].map((b) => b.toString(16).padStart(2, "0")).join(" "));
-      await writer.write(req);
-    }
-
-    // 控制字操作：切换位
-    function toggleBit(id, bitName) {
-      if (!checkConnection()) return;
-      const bit = CONTROL_BITS[bitName];
-      controlWords[id] ^= 1 << bit;
-      updateControlButtons(id);
-      sendControlWord(id);
-    }
-
-    // 控制字操作：脉冲位（短按触发）
-    function pulseBit(id, bitName) {
-      if (!checkConnection()) return;
-      const bit = CONTROL_BITS[bitName];
-      controlWords[id] |= 1 << bit;
-      updateControlButtons(id);
-      sendControlWord(id);
-      setTimeout(() => {
-        controlWords[id] &= ~(1 << bit);
-        updateControlButtons(id);
-      }, 100);
-    }
-
-    // 更新控制字按钮样式
-    function updateControlButtons(id) {
-      const sw = statusWords[id];
-      const cw = controlWords[id];
-
-      const enableBtn = document.getElementById(`enableBtn${id}`);
-      const moveBtn = document.getElementById(`moveBtn${id}`);
-      const initBtn = document.getElementById(`initBtn${id}`);
-      const estopBtn = document.getElementById(`estopBtn${id}`);
-
-      enableBtn.classList.toggle("active", (sw & (1 << CONTROL_BITS.enable)) !== 0);
-      moveBtn.classList.toggle("active", (sw & (1 << CONTROL_BITS.move)) !== 0);
-      initBtn.classList.toggle("active", (cw & (1 << CONTROL_BITS.init)) !== 0);
-      estopBtn.classList.toggle("estop", (cw & (1 << CONTROL_BITS.estop)) !== 0);
-
-      // 运动中动画
-      if ((sw & (1 << 1)) !== 0) {
-        moveBtn.classList.add("running");
-        moveBtn.classList.remove("done");
-      } else {
-        moveBtn.classList.remove("running");
-        if ((sw & (1 << 2)) !== 0) {
-          moveBtn.classList.add("done");
-        } else {
-          moveBtn.classList.remove("done");
-        }
-      }
-    }
-
-    // 发送控制字
-    function sendControlWord(id) {
-      sendModbus(id, 0x10, 0, [controlWords[id]]);
-    }
-
-    // 设置运动模式 (绝对/相对)
-    function setMode(id) {
-      const mode = document.getElementById(`modeSelect${id}`).value;
-      if (mode === "abs") {
-        controlWords[id] |= 1 << CONTROL_BITS.abs;
-      } else {
-        controlWords[id] &= ~(1 << CONTROL_BITS.abs);
-      }
-      // 不在此处发送数据
-      updateControlButtons(id);
-    }
-
-    // 发送参数：目标位置、速度、加速度
-    function sendParams(id) {
-      if (!checkConnection()) return;
-      const pos = parseFloat(document.getElementById(`targetPos${id}`).value) || 0;
-      const spd = parseFloat(document.getElementById(`speed${id}`).value) || 0;
-      const acc = parseFloat(document.getElementById(`accel${id}`).value) || 0;
-      const posRegs = float32ToRegisters(pos);
-      const spdRegs = float32ToRegisters(spd);
-      const accRegs = float32ToRegisters(acc);
-
-      sendModbus(id, 0x10, 2, [...posRegs, ...spdRegs, ...accRegs]);
-    }
-
-    // 读取所有电机的所有寄存器 (0 - 29)
-    function readAllParams(isAuto = false) {
-      if (!port || !writer) {
-        if (!isAuto) {
-          alert(i18n[currentLang].alertUnconnected);
-        }
-        return;
-      }
-      const slaveId = 1;
-      const functionCode = 0x03;
-      const registerCount = 30;
-      const startAddr = 0;
-
-      // 构建 8 字节 Modbus RTU 请求帧
-      const request = new Uint8Array(8);
-      request[0] = slaveId;
-      request[1] = functionCode;
-      request[2] = (startAddr >> 8) & 0xFF;
-      request[3] = startAddr & 0xFF;
-      request[4] = (registerCount >> 8) & 0xFF;
-      request[5] = registerCount & 0xFF;
-
-      // 手动计算 CRC
-      let crc = 0xFFFF;
-      for (let j = 0; j < 6; j++) {
-        crc ^= request[j];
-        for (let k = 0; k < 8; k++) {
-          if (crc & 0x0001) {
-            crc = (crc >> 1) ^ 0xA001;
-          } else {
-            crc = crc >> 1;
-          }
-        }
-      }
-      request[6] = crc & 0xFF;        // CRC 低位
-      request[7] = (crc >> 8) & 0xFF; // CRC 高位
-
-      // 发送到串口
-      writer.write(request).catch(e => {
-        logConsole("Read error: " + e);
-      });
-    }
-
-    // 轮询动画进度条
-    function animateProgressBar(interval) {
-      if (progressTimer) clearInterval(progressTimer);
-      const stepTime = 50; // ms
-      progressVal = 0;
-      progressTimer = setInterval(() => {
-        if (!port) {
-          document.getElementById("progressFill").style.width = "0%";
-          clearInterval(progressTimer);
-          return;
-        }
-        progressVal += (stepTime / interval) * 100;
-        if (progressVal >= 100) {
-          progressVal = 0;
-        }
-        document.getElementById("progressFill").style.width = `${progressVal}%`;
-      }, stepTime);
-    }
-
-    // 轮询读取数据
-    function startPolling() {
-      if (pollingTimer) clearInterval(pollingTimer);
-      const interval = parseInt(document.getElementById("pollingInterval").value) || 1000;
-      pollingTimer = setInterval(() => {
-        readAllParams(true);
-      }, interval);
-      animateProgressBar(interval);
-      logConsole(i18n[currentLang].pollingStart + interval + " ms");
-      readAllParams(true);
-      // readSerialLoop() is now started prior to verification in connectSerial()
-    }
-
-    function parseSerialBuffer() {
-      while (serialBuffer.length >= 5) {
-        const slave = serialBuffer[0];
-        const func = serialBuffer[1];
-
-        // 异常帧响应 (功能码最高位为 1，即 func >= 0x80)，异常帧固定为 5 字节
-        if (func >= 0x80) {
-          const frameLen = 5;
-          if (serialBuffer.length < frameLen) break;
-          const frame = serialBuffer.slice(0, frameLen);
-          const crcCalc = crc16(frame.slice(0, frameLen - 2));
-          const crcReceived = (frame[frameLen - 1] << 8) | frame[frameLen - 2];
-          if (crcCalc !== crcReceived) {
-            serialBuffer.shift();
-            continue;
-          }
-
-          logConsole(i18n[currentLang].logReceived + " [Exception " + frame[2] + "] " + frame.map(v => v.toString(16).padStart(2, '0')).join(' '));
-
-          if (pendingResponseResolver) {
-            pendingResponseResolver({ success: false, exceptionCode: frame[2], frame: frame });
-          }
-
-          serialBuffer.splice(0, frameLen);
-          continue;
+        // 串口连接开关
+        async function toggleConnection() {
+            if (port) {
+                await disconnectSerial();
+            } else {
+                await connectSerial();
+            }
         }
 
-        // 读寄存器响应功能码 (0x03)
-        if (func === 0x03) {
-          const byteCount = serialBuffer[2];
-          const frameLen = 3 + byteCount + 2;
-          if (serialBuffer.length < frameLen) break;
-          const frame = serialBuffer.slice(0, frameLen);
-          const crcCalc = crc16(frame.slice(0, frameLen - 2));
-          const crcReceived = (frame[frameLen - 1] << 8) | frame[frameLen - 2];
-          if (crcCalc !== crcReceived) {
-            serialBuffer.shift();
-            continue;
-          }
+        // 串口连接
+        async function connectSerial() {
+            inital = true;
+            try {
+                port = await navigator.serial.requestPort();
+                const baudRate = parseInt(document.getElementById("baudRate").value);
 
-          logConsole(i18n[currentLang].logReceived + frame.map(v => v.toString(16).padStart(2, '0')).join(' '));
+                document.getElementById("serialStatus").className = "status-badge status-connecting";
+                document.getElementById("serialStatus").setAttribute("data-i18n", "statusConnecting");
+                updateLanguage();
 
-          if (pendingResponseResolver) {
-            pendingResponseResolver({ success: true, func: 0x03, data: frame.slice(3, 3 + byteCount), frame: frame });
-          } else {
-            parseModbusResponse(frame);
-          }
+                await port.open({ baudRate });
+                writer = port.writable.getWriter();
+                reader = port.readable.getReader();
 
-          serialBuffer.splice(0, frameLen);
-          continue;
+                // 启动后台读取循环，为验证数据接收做准备
+                readSerialLoop();
+
+                // 开始进行设备验证
+                logConsole(i18n[currentLang].verifying);
+                const verified = await verifyDeviceConnection();
+                if (!verified) {
+                    alert(i18n[currentLang].verificationFailed);
+                    await disconnectSerial();
+                    return;
+                }
+
+                logConsole(i18n[currentLang].verificationSuccess);
+
+                document.getElementById("serialStatus").className = "status-badge status-connected";
+                document.getElementById("serialStatus").setAttribute("data-i18n", "statusConnected");
+                document.getElementById("connectBtn").setAttribute("data-i18n", "disconnect");
+                document.getElementById("connectBtn").className = "btn btn-danger";
+                updateLanguage();
+
+                logConsole(i18n[currentLang].logConnected);
+
+                startPolling();
+            } catch (e) {
+                alert(i18n[currentLang].alertConnectFail + e);
+                await disconnectSerial();
+            }
         }
 
-        // 写寄存器响应功能码 (0x10)
-        if (func === 0x10) {
-          const frameLen = 8;
-          if (serialBuffer.length < frameLen) break;
-          const frame = serialBuffer.slice(0, frameLen);
-          const crcCalc = crc16(frame.slice(0, frameLen - 2));
-          const crcReceived = (frame[frameLen - 1] << 8) | frame[frameLen - 2];
-          if (crcCalc !== crcReceived) {
-            serialBuffer.shift();
-            continue;
-          }
+        // 断开串口
+        async function disconnectSerial() {
+            if (pollingTimer) {
+                clearInterval(pollingTimer);
+                pollingTimer = null;
+            }
 
-          logConsole(i18n[currentLang].logReceived + frame.map(v => v.toString(16).padStart(2, '0')).join(' '));
+            if (reader) {
+                try {
+                    await reader.cancel();
+                    reader.releaseLock();
+                } catch (e) {
+                    console.error("Error releasing reader:", e);
+                }
+                reader = null;
+            }
 
-          if (pendingResponseResolver) {
-            pendingResponseResolver({ success: true, func: 0x10, frame: frame });
-          }
+            if (writer) {
+                try {
+                    writer.releaseLock();
+                } catch (e) {
+                    console.error("Error releasing writer:", e);
+                }
+                writer = null;
+            }
 
-          serialBuffer.splice(0, frameLen);
-          continue;
+            if (port) {
+                try {
+                    await port.close();
+                } catch (e) {
+                    console.error("Error closing port:", e);
+                }
+                port = null;
+            }
+
+            document.getElementById("serialStatus").className = "status-badge status-disconnected";
+            document.getElementById("serialStatus").setAttribute("data-i18n", "statusDisconnected");
+            document.getElementById("connectBtn").setAttribute("data-i18n", "connect");
+            document.getElementById("connectBtn").className = "btn btn-success";
+            updateLanguage();
+
+            logConsole(i18n[currentLang].logDisconnected);
         }
 
-        // 不支持的功能码或无效字节，向后平移
-        serialBuffer.shift();
-      }
-    }
-
-    // 解析 Modbus 响应，更新 UI 显示
-    function parseModbusResponse(data) {
-      if (data.length < 5) return;
-
-      const slave = data[0];
-      const func = data[1];
-      const byteCount = data[2];
-      if (func !== 0x03) return;
-      if (data.length < 5 + byteCount) return;
-
-      for (let i = 0; i < 3; i++) {
-        const offset = i * 20; // 每个电机占用 10 寄存器 = 20 字节
-
-        if (byteCount >= offset + 20) {
-          const getFloat = (start) => {
-            const buf = new ArrayBuffer(4);
-            const view = new DataView(buf);
-            view.setUint8(0, data[3 + start]);
-            view.setUint8(1, data[3 + start + 1]);
-            view.setUint8(2, data[3 + start + 2]);
-            view.setUint8(3, data[3 + start + 3]);
-            return view.getFloat32(0, false); // 大端模式
-          };
-
-          // 解析寄存器内容
-          controlWords[i] = (data[3 + offset] << 8) | data[3 + offset + 1];
-          statusWords[i] = (data[3 + offset + 2] << 8) | data[3 + offset + 3];
-          const targetPos = getFloat(offset + 4);  // 寄存器 2-3
-          const speed = getFloat(offset + 8);  // 寄存器 4-5
-          const accel = getFloat(offset + 12); // 寄存器 6-7
-          const curPos = getFloat(offset + 16); // 寄存器 8-9
-
-          if (inital) {
-            document.getElementById(`targetPos${i}`).value = targetPos.toFixed(1);
-            document.getElementById(`speed${i}`).value = speed.toFixed(1);
-            document.getElementById(`accel${i}`).value = accel.toFixed(1);
-          }
-
-          document.getElementById(`pos${i}`).textContent = curPos.toFixed(1);
-
-          if (controlWords[i] & 0x04) {
-            document.getElementById(`modeSelect${i}`).value = "abs";
-          } else {
-            document.getElementById(`modeSelect${i}`).value = "rel";
-          }
-
-          updateControlButtons(i);
+        async function readSerialLoop() {
+            while (reader) {
+                try {
+                    const { value, done } = await reader.read();
+                    if (done || !value) break;
+                    serialBuffer.push(...value);
+                    parseSerialBuffer();
+                } catch (e) {
+                    logConsole(i18n[currentLang].logReadError + (e.message || e));
+                    break;
+                }
+            }
         }
-      }
-      inital = false;
-    }
 
-    // 串口监视器开关
-    function toggleConsole() {
-      const consoleDiv = document.getElementById("console");
-      if (consoleDiv.style.display === "none") {
-        consoleDiv.style.display = "block";
-        consoleDiv.scrollIntoView({ behavior: 'smooth' });
-      } else {
-        consoleDiv.style.display = "none";
-      }
-    }
+        // --- 设备验证辅助逻辑 ---
+        let pendingResponseResolver = null;
 
-    // 清空控制台
-    function clearConsole() {
-      document.getElementById("consoleLog").textContent = "";
-    }
+        function buildCustomReadRequest(startAddr, regCount = 1) {
+            const payload = [0x01, 0x03, startAddr >> 8, startAddr & 0xff, regCount >> 8, regCount & 0xff];
+            const crc = crc16(payload);
+            return new Uint8Array([...payload, crc & 0xff, crc >> 8]);
+        }
 
-    // 串口监视器日志
-    function logConsole(msg) {
-      const log = document.getElementById("consoleLog");
-      if (!log) return;
-      const now = new Date().toLocaleTimeString();
-      log.textContent += `[${now}] ${msg}\n`;
+        function sendAndWaitResponse(frame, timeoutMs = 800) {
+            return new Promise((resolve) => {
+                let timeoutTimer = setTimeout(() => {
+                    pendingResponseResolver = null;
+                    resolve({ success: false, timeout: true });
+                }, timeoutMs);
 
-      // Auto scroll to bottom
-      log.scrollTop = log.scrollHeight;
+                pendingResponseResolver = (result) => {
+                    clearTimeout(timeoutTimer);
+                    pendingResponseResolver = null;
+                    resolve(result);
+                };
 
-      // Limit log size to 200 lines
-      const lines = log.textContent.split('\n');
-      if (lines.length > 200) {
-        log.textContent = lines.slice(lines.length - 200).join('\n');
-      }
-    }
+                logConsole(i18n[currentLang].logSent + [...frame].map((b) => b.toString(16).padStart(2, "0")).join(" "));
+                writer.write(frame).catch(err => {
+                    clearTimeout(timeoutTimer);
+                    pendingResponseResolver = null;
+                    resolve({ success: false, error: err });
+                });
+            });
+        }
 
-    // 手动发送数据，输入 16 进制字符串
-    async function manualSend() {
-      if (!checkConnection()) return;
-      const hexStr = document.getElementById("manualHex").value.trim();
-      if (!hexStr) return;
+        async function verifyDeviceConnection() {
+            // 1. 验证第一个寄存器地址 (0)
+            const frame0 = buildCustomReadRequest(0, 1);
+            const res0 = await sendAndWaitResponse(frame0, 1000);
+            if (!res0.success) {
+                logConsole("Verification failed: Register 0 read failed.");
+                return false;
+            }
 
-      try {
-        const bytes = hexStr.split(/\s+/).map(b => {
-          const parsed = parseInt(b, 16);
-          if (isNaN(parsed)) throw new Error("Invalid hex byte");
-          return parsed;
-        });
-        const arr = new Uint8Array(bytes);
-        await writer.write(arr);
-        logConsole(i18n[currentLang].logSent + hexStr);
-      } catch (e) {
-        alert("Hex format error! Check your input bytes (e.g. 01 03 00 00)");
-      }
-    }
-  </script>
+            // 2. 验证最后一个寄存器地址 (29)
+            const frame29 = buildCustomReadRequest(29, 1);
+            const res29 = await sendAndWaitResponse(frame29, 1000);
+            if (!res29.success) {
+                logConsole("Verification failed: Register 29 read failed.");
+                return false;
+            }
+
+            // 3. 验证最后一个寄存器后一个地址 (30)，期望响应异常且异常码为 02
+            const frame30 = buildCustomReadRequest(30, 1);
+            const res30 = await sendAndWaitResponse(frame30, 1000);
+
+            if (res30.success) {
+                logConsole("Verification failed: Register 30 exists, wrong device connected.");
+                return false;
+            }
+
+            if (res30.exceptionCode !== 2) {
+                logConsole("Verification failed: Register 30 did not return Modbus exception code 02 (got: " + res30.exceptionCode + ").");
+                return false;
+            }
+
+            return true;
+        }
+        // -------------------------
+
+        // 转换 float32 到两个寄存器的 16 位数数组（高位在前）
+        function float32ToRegisters(val) {
+            const buf = new DataView(new ArrayBuffer(4));
+            buf.setFloat32(0, val, false);
+            return [buf.getUint16(0), buf.getUint16(2)];
+        }
+
+        // CRC16 计算函数（Modbus 标准）
+        function crc16(buf) {
+            let crc = 0xffff;
+            for (let pos = 0; pos < buf.length; pos++) {
+                crc ^= buf[pos];
+                for (let i = 8; i !== 0; i--) {
+                    if ((crc & 0x0001) !== 0) {
+                        crc >>= 1;
+                        crc ^= 0xa001;
+                    } else crc >>= 1;
+                }
+            }
+            return crc;
+        }
+
+        // 构建 Modbus 请求帧
+        function buildModbusRequest(id, func, startAddr, values = []) {
+            const slaveAddr = 0x01; // 所有电机共用一个从机地址
+            const baseAddr = id * 10 + startAddr; // 电机寄存器偏移
+            const payload = [slaveAddr, func, baseAddr >> 8, baseAddr & 0xff];
+            if (func === 0x03) {
+                // 读寄存器，固定读 10 个寄存器
+                payload.push(0x00, 0x0a);
+            } else if (func === 0x10) {
+                // 写多个寄存器
+                const regCount = values.length;
+                payload.push(0x00, regCount, regCount * 2);
+                for (const val of values) {
+                    payload.push(val >> 8, val & 0xff);
+                }
+            }
+            const crc = crc16(payload);
+            // 注意：CRC 低字节先发，高字节后发
+            return new Uint8Array([...payload, crc & 0xff, crc >> 8]);
+        }
+
+        // 发送 Modbus 命令
+        async function sendModbus(id, func, startAddr, values = []) {
+            if (!writer) {
+                logConsole(i18n[currentLang].alertUnconnected);
+                return;
+            }
+            const req = buildModbusRequest(id, func, startAddr, values);
+            logConsole(i18n[currentLang].logSent + [...req].map((b) => b.toString(16).padStart(2, "0")).join(" "));
+            await writer.write(req);
+        }
+
+        // 控制字操作：切换位
+        function toggleBit(id, bitName) {
+            if (!checkConnection()) return;
+            const bit = CONTROL_BITS[bitName];
+            controlWords[id] ^= 1 << bit;
+            updateControlButtons(id);
+            sendControlWord(id);
+        }
+
+        // 控制字操作：脉冲位（短按触发）
+        function pulseBit(id, bitName) {
+            if (!checkConnection()) return;
+            const bit = CONTROL_BITS[bitName];
+            controlWords[id] |= 1 << bit;
+            updateControlButtons(id);
+            sendControlWord(id);
+            setTimeout(() => {
+                controlWords[id] &= ~(1 << bit);
+                updateControlButtons(id);
+                sendControlWord(id); // Send again to clear the pulse bit on the server
+            }, 150);
+        }
+
+        // 更新控制字按钮样式
+        function updateControlButtons(id) {
+            const sw = statusWords[id];
+            const cw = controlWords[id];
+
+            const enableBtn = document.getElementById(`enableBtn${id}`);
+            const moveBtn = document.getElementById(`moveBtn${id}`);
+            const initBtn = document.getElementById(`initBtn${id}`);
+            const estopBtn = document.getElementById(`estopBtn${id}`);
+
+            enableBtn.classList.toggle("active", (sw & (1 << CONTROL_BITS.enable)) !== 0);
+            moveBtn.classList.toggle("active", (sw & (1 << CONTROL_BITS.move)) !== 0);
+            initBtn.classList.toggle("active", (cw & (1 << CONTROL_BITS.init)) !== 0);
+            estopBtn.classList.toggle("estop", (cw & (1 << CONTROL_BITS.estop)) !== 0);
+
+            // 运动中动画
+            if ((sw & (1 << 1)) !== 0) {
+                moveBtn.classList.add("running");
+                moveBtn.classList.remove("done");
+            } else {
+                moveBtn.classList.remove("running");
+                if ((sw & (1 << 2)) !== 0) {
+                    moveBtn.classList.add("done");
+                } else {
+                    moveBtn.classList.remove("done");
+                }
+            }
+        }
+
+        // 发送控制字
+        function sendControlWord(id) {
+            sendModbus(id, 0x10, 0, [controlWords[id]]);
+        }
+
+        // 设置运动模式 (绝对/相对)
+        function setMode(id) {
+            if (!checkConnection()) return;
+            const mode = document.getElementById(`modeSelect${id}`).value;
+            if (mode === "abs") {
+                controlWords[id] |= 1 << CONTROL_BITS.abs;
+            } else {
+                controlWords[id] &= ~(1 << CONTROL_BITS.abs);
+            }
+            sendControlWord(id);
+            updateControlButtons(id);
+        }
+
+        // 发送参数：目标位置、速度、加速度
+        function sendParams(id) {
+            if (!checkConnection()) return;
+            const pos = parseFloat(document.getElementById(`targetPos${id}`).value) || 0;
+            const spd = parseFloat(document.getElementById(`speed${id}`).value) || 0;
+            const acc = parseFloat(document.getElementById(`accel${id}`).value) || 0;
+            const posRegs = float32ToRegisters(pos);
+            const spdRegs = float32ToRegisters(spd);
+            const accRegs = float32ToRegisters(acc);
+
+            sendModbus(id, 0x10, 2, [...posRegs, ...spdRegs, ...accRegs]);
+        }
+
+        // 读取所有电机的所有寄存器 (0 - 29)
+        function readAllParams(isAuto = false) {
+            if (!port || !writer) {
+                if (!isAuto) {
+                    alert(i18n[currentLang].alertUnconnected);
+                }
+                return;
+            }
+            const slaveId = 1;
+            const functionCode = 0x03;
+            const registerCount = 30;
+            const startAddr = 0;
+
+            // 构建 8 字节 Modbus RTU 请求帧
+            const request = new Uint8Array(8);
+            request[0] = slaveId;
+            request[1] = functionCode;
+            request[2] = (startAddr >> 8) & 0xFF;
+            request[3] = startAddr & 0xFF;
+            request[4] = (registerCount >> 8) & 0xFF;
+            request[5] = registerCount & 0xFF;
+
+            // 手动计算 CRC
+            let crc = 0xFFFF;
+            for (let j = 0; j < 6; j++) {
+                crc ^= request[j];
+                for (let k = 0; k < 8; k++) {
+                    if (crc & 0x0001) {
+                        crc = (crc >> 1) ^ 0xA001;
+                    } else {
+                        crc = crc >> 1;
+                    }
+                }
+            }
+            request[6] = crc & 0xFF;        // CRC 低位
+            request[7] = (crc >> 8) & 0xFF; // CRC 高位
+
+            // 发送到串口
+            writer.write(request).catch(e => {
+                logConsole("Read error: " + e);
+            });
+        }
+
+        // 轮询读取数据
+        function startPolling() {
+            if (pollingTimer) clearInterval(pollingTimer);
+            const interval = parseInt(document.getElementById("pollingInterval").value) || 1000;
+            pollingTimer = setInterval(() => {
+                readAllParams(true);
+            }, interval);
+            logConsole(i18n[currentLang].pollingStart + interval + " ms");
+            readAllParams(true);
+            // readSerialLoop() is now started prior to verification in connectSerial()
+        }
+
+        function parseSerialBuffer() {
+            while (serialBuffer.length >= 5) {
+                const slave = serialBuffer[0];
+                const func = serialBuffer[1];
+
+                // 异常帧响应 (功能码最高位为 1，即 func >= 0x80)，异常帧固定为 5 字节
+                if (func >= 0x80) {
+                    const frameLen = 5;
+                    if (serialBuffer.length < frameLen) break;
+                    const frame = serialBuffer.slice(0, frameLen);
+                    const crcCalc = crc16(frame.slice(0, frameLen - 2));
+                    const crcReceived = (frame[frameLen - 1] << 8) | frame[frameLen - 2];
+                    if (crcCalc !== crcReceived) {
+                        serialBuffer.shift();
+                        continue;
+                    }
+
+                    logConsole(i18n[currentLang].logReceived + " [Exception " + frame[2] + "] " + frame.map(v => v.toString(16).padStart(2, '0')).join(' '));
+
+                    if (pendingResponseResolver) {
+                        pendingResponseResolver({ success: false, exceptionCode: frame[2], frame: frame });
+                    }
+
+                    serialBuffer.splice(0, frameLen);
+                    continue;
+                }
+
+                // 读寄存器响应功能码 (0x03)
+                if (func === 0x03) {
+                    const byteCount = serialBuffer[2];
+                    const frameLen = 3 + byteCount + 2;
+                    if (serialBuffer.length < frameLen) break;
+                    const frame = serialBuffer.slice(0, frameLen);
+                    const crcCalc = crc16(frame.slice(0, frameLen - 2));
+                    const crcReceived = (frame[frameLen - 1] << 8) | frame[frameLen - 2];
+                    if (crcCalc !== crcReceived) {
+                        serialBuffer.shift();
+                        continue;
+                    }
+
+                    logConsole(i18n[currentLang].logReceived + frame.map(v => v.toString(16).padStart(2, '0')).join(' '));
+
+                    if (pendingResponseResolver) {
+                        pendingResponseResolver({ success: true, func: 0x03, data: frame.slice(3, 3 + byteCount), frame: frame });
+                    } else {
+                        parseModbusResponse(frame);
+                    }
+
+                    serialBuffer.splice(0, frameLen);
+                    continue;
+                }
+
+                // 写寄存器响应功能码 (0x10)
+                if (func === 0x10) {
+                    const frameLen = 8;
+                    if (serialBuffer.length < frameLen) break;
+                    const frame = serialBuffer.slice(0, frameLen);
+                    const crcCalc = crc16(frame.slice(0, frameLen - 2));
+                    const crcReceived = (frame[frameLen - 1] << 8) | frame[frameLen - 2];
+                    if (crcCalc !== crcReceived) {
+                        serialBuffer.shift();
+                        continue;
+                    }
+
+                    logConsole(i18n[currentLang].logReceived + frame.map(v => v.toString(16).padStart(2, '0')).join(' '));
+
+                    if (pendingResponseResolver) {
+                        pendingResponseResolver({ success: true, func: 0x10, frame: frame });
+                    }
+
+                    serialBuffer.splice(0, frameLen);
+                    continue;
+                }
+
+                // 不支持的功能码或无效字节，向后平移
+                serialBuffer.shift();
+            }
+        }
+
+        // 解析 Modbus 响应，更新 UI 显示
+        function parseModbusResponse(data) {
+            if (data.length < 5) return;
+
+            const slave = data[0];
+            const func = data[1];
+            const byteCount = data[2];
+            if (func !== 0x03) return;
+            if (data.length < 5 + byteCount) return;
+
+            for (let i = 0; i < 3; i++) {
+                const offset = i * 20; // 每个电机占用 10 寄存器 = 20 字节
+
+                if (byteCount >= offset + 20) {
+                    const getFloat = (start) => {
+                        const buf = new ArrayBuffer(4);
+                        const view = new DataView(buf);
+                        view.setUint8(0, data[3 + start]);
+                        view.setUint8(1, data[3 + start + 1]);
+                        view.setUint8(2, data[3 + start + 2]);
+                        view.setUint8(3, data[3 + start + 3]);
+                        return view.getFloat32(0, false); // 大端模式
+                    };
+
+                    // 解析寄存器内容
+                    controlWords[i] = (data[3 + offset] << 8) | data[3 + offset + 1];
+                    statusWords[i] = (data[3 + offset + 2] << 8) | data[3 + offset + 3];
+                    const targetPos = getFloat(offset + 4);  // 寄存器 2-3
+                    const speed = getFloat(offset + 8);  // 寄存器 4-5
+                    const accel = getFloat(offset + 12); // 寄存器 6-7
+                    const curPos = getFloat(offset + 16); // 寄存器 8-9
+
+                    if (inital) {
+                        document.getElementById(`targetPos${i}`).value = targetPos.toFixed(1);
+                        document.getElementById(`speed${i}`).value = speed.toFixed(1);
+                        document.getElementById(`accel${i}`).value = accel.toFixed(1);
+                    }
+
+                    document.getElementById(`pos${i}`).textContent = curPos.toFixed(1);
+
+                    if (controlWords[i] & 0x04) {
+                        document.getElementById(`modeSelect${i}`).value = "abs";
+                    } else {
+                        document.getElementById(`modeSelect${i}`).value = "rel";
+                    }
+
+                    updateControlButtons(i);
+                }
+            }
+            inital = false;
+        }
+
+        // 串口监视器开关
+        function toggleConsole() {
+            const consoleDiv = document.getElementById("console");
+            if (consoleDiv.style.display === "none") {
+                consoleDiv.style.display = "block";
+                consoleDiv.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                consoleDiv.style.display = "none";
+            }
+        }
+
+        // 清空控制台
+        function clearConsole() {
+            document.getElementById("consoleLog").textContent = "";
+        }
+
+        // 串口监视器日志
+        function logConsole(msg) {
+            const log = document.getElementById("consoleLog");
+            if (!log) return;
+            const now = new Date().toLocaleTimeString();
+            log.textContent += `[${now}] ${msg}\n`;
+
+            // Auto scroll to bottom
+            log.scrollTop = log.scrollHeight;
+
+            // Limit log size to 200 lines
+            const lines = log.textContent.split('\n');
+            if (lines.length > 200) {
+                log.textContent = lines.slice(lines.length - 200).join('\n');
+            }
+        }
+
+        // 手动发送数据，输入 16 进制字符串
+        async function manualSend() {
+            if (!checkConnection()) return;
+            const hexStr = document.getElementById("manualHex").value.trim();
+            if (!hexStr) return;
+
+            try {
+                const bytes = hexStr.split(/\s+/).map(b => {
+                    const parsed = parseInt(b, 16);
+                    if (isNaN(parsed)) throw new Error("Invalid hex byte");
+                    return parsed;
+                });
+                const arr = new Uint8Array(bytes);
+                await writer.write(arr);
+                logConsole(i18n[currentLang].logSent + hexStr);
+            } catch (e) {
+                alert("Hex format error! Check your input bytes (e.g. 01 03 00 00)");
+            }
+        }
+    </script>
 </body>
 
 </html>
